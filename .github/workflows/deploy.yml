@@ -1,34 +1,28 @@
-name: Deploy Node-RED
+name: Deploy
 
 on:
   workflow_dispatch:
   push:
     branches: ["main"]
-    paths:
-      - "nodered/**"
-      - ".github/workflows/deploy.yml"
 
 concurrency:
-  group: deploy-nodered-main
+  group: deploy-main
   cancel-in-progress: true
-
-permissions:
-  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
-      - name: Deploy Node-RED to VM over SSH
+      - name: Deploy to VM over SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           timeout: 2m
-          command_timeout: 30m
+          command_timeout: 45m
           script_stop: true
           script: |
             set -euo pipefail
@@ -39,24 +33,26 @@ jobs:
             IMAGE_NAME=nodered/node-red:latest
 
             cd "$REPO_DIR"
-            git fetch --all
+            git fetch --all --prune
             git reset --hard origin/main
 
-            sudo mkdir -p "$DATA_DIR"
-            sudo cp -a "$REPO_DIR/nodered/." "$DATA_DIR/"
+            mkdir -p "$DATA_DIR"
 
-            sudo npm ci --omit=dev --prefix "$DATA_DIR"
-            sudo chown -R 1000:1000 "$DATA_DIR"
+            rsync -a --delete \
+              --exclude '.git/' \
+              "$REPO_DIR/nodered/" "$DATA_DIR/"
 
-            sudo docker pull "$IMAGE_NAME"
-            sudo docker rm -f "$CONTAINER_NAME" || true
+            npm ci --omit=dev --prefix "$DATA_DIR"
 
-            sudo docker run -d \
+            docker pull "$IMAGE_NAME"
+            docker rm -f "$CONTAINER_NAME" || true
+
+            docker run -d \
               --name "$CONTAINER_NAME" \
               --restart unless-stopped \
               -p 1880:1880 \
               -v "$DATA_DIR:/data" \
               "$IMAGE_NAME"
 
-            sudo docker ps --filter "name=$CONTAINER_NAME"
-            sudo docker logs --tail=120 "$CONTAINER_NAME" || true
+            docker ps --filter "name=$CONTAINER_NAME"
+            docker logs --tail=120 "$CONTAINER_NAME" || true
