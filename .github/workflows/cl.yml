@@ -1,0 +1,62 @@
+name: Node-RED CI
+
+on:
+  pull_request:
+    paths:
+      - "nodered/**"
+      - ".github/workflows/cl.yml"
+      - ".github/workflows/deploy.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "nodered/**"
+      - ".github/workflows/cl.yml"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Node-RED userDir dependencies
+        working-directory: nodered
+        run: npm ci --omit=dev
+
+      - name: Validate flows JSON
+        run: |
+          jq empty nodered/flows.json
+          jq empty nodered/flows_cred.json
+
+      - name: Validate settings.js syntax
+        run: node --check nodered/settings.js
+
+      - name: Smoke boot Node-RED in safe mode
+        run: |
+          docker run -d \
+            --name nodered-smoke \
+            -p 1881:1880 \
+            -e NODE_RED_ENABLE_SAFE_MODE=true \
+            -v "$GITHUB_WORKSPACE/nodered:/data" \
+            nodered/node-red:latest
+
+          sleep 15
+
+          docker ps --filter name=nodered-smoke
+          docker logs --tail=200 nodered-smoke
+
+          docker rm -f nodered-smoke
