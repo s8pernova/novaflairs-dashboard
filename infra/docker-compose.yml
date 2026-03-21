@@ -1,0 +1,15 @@
+services:
+  nodered:
+    container_name: nodered
+    image: ghcr.io/s8pernova/orbit-fire-dashboard-nodered:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "1880:1880"
+    environment:
+      TZ: America/New_York
+      NODE_RED_CREDENTIAL_SECRET: ${NODE_RED_CREDENTIAL_SECRET}
+    volumes:
+      - node_red_data:/data
+
+volumes:
+  node_red_data:
