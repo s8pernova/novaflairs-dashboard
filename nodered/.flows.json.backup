@@ -1,0 +1,119 @@
+[
+    {
+        "id": "7cd04ac0112924d7",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "2e7ffb782503cc36",
+        "type": "postgreSQLConfig",
+        "name": "NovaFlairs Prod",
+        "host": "aws-1-us-east-1.pooler.supabase.com",
+        "hostFieldType": "str",
+        "port": 5432,
+        "portFieldType": "num",
+        "database": "postgres",
+        "databaseFieldType": "str",
+        "ssl": "true",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": 10,
+        "maxFieldType": "num",
+        "idle": 1000,
+        "idleFieldType": "num",
+        "connectionTimeout": 10000,
+        "connectionTimeoutFieldType": "num",
+        "user": "postgres.whqcokvychwqxulzvxkm",
+        "userFieldType": "str",
+        "password": "76_Super_Supreme_Pizza!",
+        "passwordFieldType": "str"
+    },
+    {
+        "id": "2232977c37e8f14e",
+        "type": "inject",
+        "z": "7cd04ac0112924d7",
+        "name": "Run every 5s",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 460,
+        "y": 220,
+        "wires": [
+            [
+                "d2d0a7a2c51bf4b2"
+            ]
+        ]
+    },
+    {
+        "id": "d2d0a7a2c51bf4b2",
+        "type": "function",
+        "z": "7cd04ac0112924d7",
+        "name": "RNG",
+        "func": "const now = new Date();\n\nconst payload = {\n  scenario_id: 1,\n  firebreak_segment_id: 1,\n  drone_id: \"drone-01\",\n  observed_at: now.toISOString(),\n  lat: 38.81234 + (Math.random() - 0.5) * 0.0002,\n  lon: -77.09321 + (Math.random() - 0.5) * 0.0002,\n  alt_m: 42 + (Math.random() - 0.5) * 2,\n  wind_speed_2m_mps: 3.2 + (Math.random() - 0.5) * 0.4,\n  wind_direction_deg: 215 + (Math.random() - 0.5) * 8,\n  flame_length_m: 2.5 + (Math.random() - 0.5) * 0.3,\n  burn_time_s: 17 + (Math.random() - 0.5) * 2,\n  source_kind: \"simulated\",\n  quality_score: 0.92,\n  raw_payload_json: {\n    source: \"node-red-generator\",\n    scenario: \"Brushfire Westline 01\"\n  }\n};\n\nmsg.params = [\n  payload.scenario_id,\n  payload.firebreak_segment_id,\n  payload.drone_id,\n  payload.observed_at,\n  payload.lat,\n  payload.lon,\n  payload.alt_m,\n  payload.wind_speed_2m_mps,\n  payload.wind_direction_deg,\n  payload.flame_length_m,\n  payload.burn_time_s,\n  payload.source_kind,\n  payload.quality_score,\n  JSON.stringify(payload.raw_payload_json)\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 220,
+        "wires": [
+            [
+                "e27df2cd89dbf448"
+            ]
+        ]
+    },
+    {
+        "id": "e27df2cd89dbf448",
+        "type": "postgresql",
+        "z": "7cd04ac0112924d7",
+        "name": "Insert to DB",
+        "query": "INSERT INTO telemetry_observations (\n  scenario_id,\n  firebreak_segment_id,\n  drone_id,\n  observed_at,\n  lat,\n  lon,\n  alt_m,\n  wind_speed_2m_mps,\n  wind_direction_deg,\n  flame_length_m,\n  burn_time_s,\n  source_kind,\n  quality_score,\n  raw_payload_json\n)\nVALUES (\n  $1,\n  $2,\n  $3,\n  $4,\n  $5,\n  $6,\n  $7,\n  $8,\n  $9,\n  $10,\n  $11,\n  $12,\n  $13,\n  $14::jsonb\n);",
+        "postgreSQLConfig": "2e7ffb782503cc36",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 790,
+        "y": 220,
+        "wires": [
+            [
+                "7e58791036496d84"
+            ]
+        ]
+    },
+    {
+        "id": "7e58791036496d84",
+        "type": "debug",
+        "z": "7cd04ac0112924d7",
+        "name": "Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 220,
+        "wires": []
+    }
+]
