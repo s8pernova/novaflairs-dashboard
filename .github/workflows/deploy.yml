@@ -61,7 +61,7 @@ jobs:
               --name "$CONTAINER_NAME" \
               --restart unless-stopped \
               --user "$(id -u):$(id -g)" \
-              -p 1880:1880 \
+              -p 127.0.0.1:1880:1880 \
               -v "$DATA_DIR:/data" \
               "$IMAGE_NAME"
 
