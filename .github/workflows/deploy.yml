@@ -49,13 +49,13 @@ jobs:
               "$REPO_DIR/nodered/" "$DATA_DIR/"
 
             docker run --rm \
+              --entrypoint /bin/sh \
               --user "$(id -u):$(id -g)" \
               -e HOME=/tmp \
               -e npm_config_cache=/tmp/.npm \
               -v "$DATA_DIR:/data" \
-              -w /data \
               "$IMAGE_NAME" \
-              sh -lc 'rm -rf node_modules && npm ci --omit=dev'
+              -lc 'cd /data && rm -rf node_modules && npm ci --omit=dev'
 
             docker run -d \
               --name "$CONTAINER_NAME" \
