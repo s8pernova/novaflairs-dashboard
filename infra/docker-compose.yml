@@ -1,7 +1,7 @@
 services:
   nodered:
     container_name: nodered
-    image: ghcr.io/s8pernova/orbit-fire-dashboard-nodered:${IMAGE_TAG}
+    image: ghcr.io/s8pernova/novaflairs-dashboard-nodered:${IMAGE_TAG}
     restart: unless-stopped
     ports:
       - "1880:1880"
