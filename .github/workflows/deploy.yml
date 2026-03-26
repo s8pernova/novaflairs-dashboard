@@ -27,7 +27,7 @@ jobs:
           script: |
             set -euo pipefail
 
-            REPO_DIR=/opt/orbit-fire-dashboard
+            REPO_DIR=/opt/novaflairs-dashboard
             DATA_DIR=/opt/node-red-data
             CONTAINER_NAME=nodered
             IMAGE_NAME=nodered/node-red:latest
