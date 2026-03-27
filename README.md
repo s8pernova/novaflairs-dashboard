@@ -1,5 +1,5 @@
-<img src="ui/public/novaflairs-ascii.png" 
-     alt="Description of image" 
-     style="display: block; margin-left: auto; margin-right: auto; width: 60%;" />
+<p align="center">
+  <img src="ui/public/novaflairs-ascii.png" />
+</p>
 
 NASA ORBIT project.
