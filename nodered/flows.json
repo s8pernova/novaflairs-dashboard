@@ -2,9 +2,17 @@
     {
         "id": "7cd04ac0112924d7",
         "type": "tab",
-        "label": "Flow 1",
+        "label": "Synthetic Data",
         "disabled": false,
-        "info": "",
+        "info": "Acts like the drone/sentry collecting the data",
+        "env": []
+    },
+    {
+        "id": "38058381c81548eb",
+        "type": "tab",
+        "label": "Fire Calculations",
+        "disabled": false,
+        "info": "Acts like the ground calculator that receives the data from the drone",
         "env": []
     },
     {
@@ -29,7 +37,7 @@
         "connectionTimeoutFieldType": "num",
         "user": "postgres.whqcokvychwqxulzvxkm",
         "userFieldType": "str",
-        "password": "76_Super_Supreme_Pizza!",
+        "password": "nf3tf2M4t$G-+X9",
         "passwordFieldType": "str"
     },
     {
@@ -103,7 +111,7 @@
         "id": "7e58791036496d84",
         "type": "debug",
         "z": "7cd04ac0112924d7",
-        "name": "Debug",
+        "name": "Inserted telemetry data",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -112,8 +120,219 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 950,
+        "x": 1000,
         "y": 220,
+        "wires": []
+    },
+    {
+        "id": "7f94324b2a58748e",
+        "type": "catch",
+        "z": "7cd04ac0112924d7",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 640,
+        "y": 300,
+        "wires": [
+            [
+                "dbae8d7b812e0165"
+            ]
+        ]
+    },
+    {
+        "id": "dbae8d7b812e0165",
+        "type": "debug",
+        "z": "7cd04ac0112924d7",
+        "name": "Errors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 810,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "cc4b6711361ca6d7",
+        "type": "inject",
+        "z": "38058381c81548eb",
+        "name": "Poll for new telemetry",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 580,
+        "y": 280,
+        "wires": [
+            [
+                "06b7910b8bc7ab69"
+            ]
+        ]
+    },
+    {
+        "id": "06b7910b8bc7ab69",
+        "type": "postgresql",
+        "z": "38058381c81548eb",
+        "name": "Fetch unprocessed observations",
+        "query": "SELECT\n    t.id AS telemetry_observation_id,\n    t.firebreak_segment_id,\n    t.observed_at,\n    t.wind_speed_2m_mps,\n    t.flame_length_m,\n    t.burn_time_s,\n    f.width_m AS firebreak_width_m,\n    mr.id AS model_run_id,\n    mr.cross_threshold,\n    mr.high_risk_threshold,\n    mr.severe_risk_threshold\nFROM telemetry_observations t\nJOIN firebreak_segments f\n    ON f.id = t.firebreak_segment_id\nJOIN model_runs mr\n    ON mr.method_name = 'Method 2 Firebreak Crossing'\nLEFT JOIN prediction_results p\n    ON p.telemetry_observation_id = t.id\n   AND p.model_run_id = mr.id\nWHERE p.id IS NULL\nORDER BY t.observed_at ASC\nLIMIT 25;",
+        "postgreSQLConfig": "2e7ffb782503cc36",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 870,
+        "y": 280,
+        "wires": [
+            [
+                "1ac4aa64fa3e75a4"
+            ]
+        ]
+    },
+    {
+        "id": "1ac4aa64fa3e75a4",
+        "type": "switch",
+        "z": "38058381c81548eb",
+        "name": "Any rows found",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "0",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1160,
+        "y": 280,
+        "wires": [
+            [
+                "a5341ec5f20f65cd"
+            ]
+        ]
+    },
+    {
+        "id": "a5341ec5f20f65cd",
+        "type": "split",
+        "z": "38058381c81548eb",
+        "name": "One observation at a time",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "property": "payload",
+        "x": 1430,
+        "y": 280,
+        "wires": [
+            [
+                "7f8bebf6fda006b7"
+            ]
+        ]
+    },
+    {
+        "id": "7f8bebf6fda006b7",
+        "type": "function",
+        "z": "38058381c81548eb",
+        "name": "Compute firebreak crossing",
+        "func": "const row = msg.payload;\n\nconst Uw = Number(row.wind_speed_2m_mps);\nconst Lfl = Number(row.flame_length_m);\nconst Wfb = Number(row.firebreak_width_m);\nconst tc = Number(row.burn_time_s);\n\nif ([Uw, Lfl, Wfb, tc].some(v => Number.isNaN(v))) {\n    node.error(\"Missing or invalid numeric input\", msg);\n    return null;\n}\n\nconst beta_tx =\n    -1.8925 +\n    (0.055 * Uw) +\n    (0.9418 * Lfl) -\n    (0.4469 * Wfb) +\n    (0.0114 * tc);\n\nconst crossing_probability = Math.exp(beta_tx) / (1 + Math.exp(beta_tx));\n\nlet risk_level;\nif (crossing_probability < 0.25) {\n    risk_level = \"moderate\";\n} else if (crossing_probability < 0.35) {\n    risk_level = \"transition\";\n} else if (crossing_probability < 0.45) {\n    risk_level = \"high\";\n} else {\n    risk_level = \"severe\";\n}\n\nconst cross_threshold = Number(row.cross_threshold ?? 0.30);\nconst predicted_crossed_yes_no =\n    crossing_probability >= cross_threshold ? \"YES\" : \"NO\";\n\nconst result = {\n    telemetry_observation_id: row.telemetry_observation_id,\n    model_run_id: row.model_run_id,\n    firebreak_width_m_snapshot: Wfb,\n    beta_tx,\n    crossing_probability,\n    risk_level,\n    predicted_crossed_yes_no\n};\n\nmsg.payload = result;\n\nmsg.params = [\n    result.telemetry_observation_id,\n    result.model_run_id,\n    result.firebreak_width_m_snapshot,\n    result.beta_tx,\n    result.crossing_probability,\n    result.risk_level,\n    result.predicted_crossed_yes_no\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1740,
+        "y": 280,
+        "wires": [
+            [
+                "b690814f514f41e2"
+            ]
+        ]
+    },
+    {
+        "id": "b690814f514f41e2",
+        "type": "postgresql",
+        "z": "38058381c81548eb",
+        "name": "Insert prediction result",
+        "query": "INSERT INTO prediction_results (\n    telemetry_observation_id,\n    model_run_id,\n    firebreak_width_m_snapshot,\n    beta_tx,\n    crossing_probability,\n    risk_level,\n    predicted_crossed_yes_no\n)\nVALUES (\n    $1, $2, $3, $4, $5, $6, $7\n)\nON CONFLICT (telemetry_observation_id, model_run_id)\nDO NOTHING;",
+        "postgreSQLConfig": "2e7ffb782503cc36",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 2040,
+        "y": 280,
+        "wires": [
+            [
+                "7e1a78a70369f43a"
+            ]
+        ]
+    },
+    {
+        "id": "7e1a78a70369f43a",
+        "type": "debug",
+        "z": "38058381c81548eb",
+        "name": "Inserted prediction",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2310,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "b9bff593428e291a",
+        "type": "catch",
+        "z": "38058381c81548eb",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 1620,
+        "y": 360,
+        "wires": [
+            [
+                "af256e726eb2aa05"
+            ]
+        ]
+    },
+    {
+        "id": "af256e726eb2aa05",
+        "type": "debug",
+        "z": "38058381c81548eb",
+        "name": "Errors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1760,
+        "y": 360,
         "wires": []
     }
 ]
