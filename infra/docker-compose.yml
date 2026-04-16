@@ -17,7 +17,8 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_SSL: ${DB_SSL}
+      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED}
+      DB_CA_CERT: ${DB_CA_CERT}
     volumes:
       - ../nodered:/data
 
