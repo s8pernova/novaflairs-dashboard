@@ -12,7 +12,7 @@ services:
       TZ: America/New_York
       NODE_RED_CREDENTIAL_SECRET: ${NODE_RED_CREDENTIAL_SECRET}
     volumes:
-      - ./nodered:/data
+      - ../nodered:/data
 
   metabase:
     container_name: novaflairs-metabase
