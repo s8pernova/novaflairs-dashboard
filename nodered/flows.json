@@ -18,8 +18,7 @@
   {
     "id": "2e7ffb782503cc36",
     "type": "postgreSQLConfig",
-    "name": "DB_NAME",
-    "nameFieldType": "env",
+    "name": "NovaFlairs Prod",
     "host": "DB_HOST",
     "hostFieldType": "env",
     "port": "DB_PORT",
