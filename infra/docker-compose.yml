@@ -11,6 +11,7 @@ services:
     environment:
       TZ: America/New_York
       NODE_RED_CREDENTIAL_SECRET: ${NODE_RED_CREDENTIAL_SECRET}
+      NODE_RED_ADMIN_PASSWORD: ${NODE_RED_ADMIN_PASSWORD}
     volumes:
       - ../nodered:/data
 
