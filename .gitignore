@@ -243,3 +243,4 @@ __browser_data__/
 conversation.txt
 *unittest*.py
 tmp/
+.codex
