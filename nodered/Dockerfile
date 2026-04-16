@@ -7,6 +7,7 @@ COPY nodered/package.json nodered/package-lock.json /data/
 RUN chown -R node-red:node-red /data
 
 USER node-red
-WORKDIR /data
 
-RUN npm ci --omit=dev && npm cache clean --force
+RUN cd /data && npm ci --omit=dev && npm cache clean --force
+
+WORKDIR /usr/src/node-red
