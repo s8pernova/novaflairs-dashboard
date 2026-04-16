@@ -6,6 +6,7 @@ services:
       dockerfile: nodered/Dockerfile
     image: novaflairs-dashboard-nodered:local
     restart: unless-stopped
+    user: "${PUID}:${PGID}"
     ports:
       - "1880:1880"
     environment:
