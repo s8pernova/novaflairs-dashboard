@@ -19,6 +19,13 @@
  *  - Node Settings
  *
  **/
+if (!process.env.NODE_RED_ADMIN_PASSWORD) {
+    throw new Error("Missing NODE_RED_ADMIN_PASSWORD");
+}
+
+if (!process.env.NODE_RED_CREDENTIAL_SECRET) {
+    throw new Error("Missing NODE_RED_CREDENTIAL_SECRET");
+}
 
 module.exports = {
     /*******************************************************************************
@@ -76,9 +83,8 @@ module.exports = {
         type: "credentials",
         users: [
             {
-                username: "admin",
-                password:
-                    "$2y$08$e48sehQO114pXCOXcqq.pOfBXFyJM4IEKwvBJIvpIC3Tv86SVcvPe",
+                username: process.env.NODE_RED_ADMIN_USER || "admin",
+                password: process.env.NODE_RED_ADMIN_PASSWORD,
                 permissions: "*",
             },
         ],
