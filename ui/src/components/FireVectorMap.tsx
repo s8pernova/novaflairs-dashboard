@@ -169,8 +169,6 @@ const INITIAL_VIEW_STATE = {
     longitude: -77.0931,
     latitude: 38.8123,
     zoom: 15,
-    pitch: 42,
-    bearing: -18,
 };
 
 export interface FireObservation {
@@ -227,7 +225,9 @@ function makeWindArrow(
     };
 }
 
-function getRiskColor(d: PositionedFireObservation): [number, number, number, number] {
+function getRiskColor(
+    d: PositionedFireObservation,
+): [number, number, number, number] {
     const probability = d.crossing_probability;
 
     if (probability === null || probability === undefined) {
