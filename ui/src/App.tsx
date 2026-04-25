@@ -11,7 +11,10 @@ function App() {
 
     useEffect(() => {
         const fetchObservations = async () => {
-            const response = await supabase.from("observations").select("*");
+            const response = await supabase
+                .from("telemetry_observations")
+                .select("*")
+                .limit(10);
             if (response.error) {
                 console.error("Error fetching observations:", response.error);
                 return;
