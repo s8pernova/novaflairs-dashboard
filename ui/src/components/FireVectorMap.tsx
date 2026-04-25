@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { type CSSProperties } from "react";
 import DeckGL from "@deck.gl/react";
 import { LineLayer, ScatterplotLayer } from "@deck.gl/layers";
 import Map from "react-map-gl/maplibre";
@@ -119,41 +119,6 @@ const MAP_STYLE_OPTIONS: MapStyleOption[] = [
     },
 ];
 
-const DEFAULT_MAP_STYLE_ID = "satellite";
-
-const MAP_CONTROL_STYLE = {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    zIndex: 1,
-    display: "grid",
-    gap: 4,
-    padding: "8px 10px",
-    borderRadius: 6,
-    background: "rgba(15, 23, 42, 0.84)",
-    color: "#f8fafc",
-    boxShadow: "0 10px 28px rgba(0, 0, 0, 0.28)",
-    backdropFilter: "blur(8px)",
-} satisfies CSSProperties;
-
-const MAP_SELECT_STYLE = {
-    minWidth: 168,
-    border: "1px solid rgba(148, 163, 184, 0.62)",
-    borderRadius: 4,
-    background: "#0f172a",
-    color: "#f8fafc",
-    fontSize: 13,
-    lineHeight: 1.2,
-    padding: "6px 8px",
-} satisfies CSSProperties;
-
-const MAP_LABEL_STYLE = {
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: 0,
-    textTransform: "uppercase",
-} satisfies CSSProperties;
-
 const MAP_SHELL_STYLE = {
     position: "relative",
     width: "100vw",
@@ -247,10 +212,6 @@ function getMarkerRadius(d: PositionedFireObservation) {
 export default function FireVectorMap({
     observations = [],
 }: FireVectorMapProps) {
-    const [mapStyleId, setMapStyleId] = useState(DEFAULT_MAP_STYLE_ID);
-    const selectedMapStyle =
-        MAP_STYLE_OPTIONS.find((option) => option.id === mapStyleId) ??
-        MAP_STYLE_OPTIONS[0];
     const positionedObservations = observations.filter(hasPosition);
 
     const windArrows = positionedObservations
@@ -288,28 +249,13 @@ export default function FireVectorMap({
 
     return (
         <div style={MAP_SHELL_STYLE}>
-            <label style={MAP_CONTROL_STYLE}>
-                <span style={MAP_LABEL_STYLE}>Map Style</span>
-                <select
-                    value={mapStyleId}
-                    onChange={(event) => setMapStyleId(event.target.value)}
-                    style={MAP_SELECT_STYLE}
-                >
-                    {MAP_STYLE_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-            </label>
-
             <DeckGL
                 initialViewState={INITIAL_VIEW_STATE}
                 controller={true}
                 layers={layers}
                 style={DECK_STYLE}
             >
-                <Map mapStyle={selectedMapStyle.style} />
+                <Map mapStyle={MAP_STYLE_OPTIONS[4].style} />
             </DeckGL>
         </div>
     );
