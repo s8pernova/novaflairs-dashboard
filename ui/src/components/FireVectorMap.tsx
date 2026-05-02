@@ -32,6 +32,7 @@ export interface FireObservation {
     wind_speed_2m_mps: number;
     wind_direction_deg: number | null;
     flame_length_m: number;
+    burn_time_s: number;
     crossing_probability?: number | null;
 }
 

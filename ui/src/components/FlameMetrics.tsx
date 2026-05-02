@@ -5,8 +5,9 @@ import {
     YAxis,
     Tooltip,
     ResponsiveContainer,
-    Cell,
+    Cell
 } from "recharts";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface FlameReading {
     /** Short label for x-axis — e.g. drone ID or timestamp */
@@ -73,22 +74,34 @@ export default function FlameMetrics({
                 <div className="bg-white/5 rounded-xl px-3 py-2 flex flex-col">
                     <span className="text-[9px] text-white/30 uppercase tracking-widest">Flame Length</span>
                     <div className="flex items-baseline gap-1 mt-0.5">
-                        <span
-                            className="text-2xl font-black tabular-nums leading-none"
-                            style={{ color: flameColor(currentFlameLengthM) }}
-                        >
-                            {currentFlameLengthM.toFixed(1)}
-                        </span>
-                        <span className="text-xs text-white/30">m</span>
+                        {currentFlameLengthM ? (
+                            <>
+                                <span
+                                    className="text-2xl font-black tabular-nums leading-none"
+                                    style={{ color: flameColor(currentFlameLengthM) }}
+                                >
+                                    {currentFlameLengthM.toFixed(2)}
+                                </span>
+                                <span className="text-xs text-white/30">m</span>
+                            </>
+                        ) : (
+                            <LoadingSpinner />
+                        )}
                     </div>
                 </div>
                 <div className="bg-white/5 rounded-xl px-3 py-2 flex flex-col">
                     <span className="text-[9px] text-white/30 uppercase tracking-widest">Burn Duration</span>
                     <div className="flex items-baseline gap-1 mt-0.5">
-                        <span className="text-2xl font-black tabular-nums text-amber-400 leading-none">
-                            {currentBurnTimeS}
-                        </span>
-                        <span className="text-xs text-white/30">s</span>
+                        {currentBurnTimeS ? (
+                            <>
+                                <span className="text-2xl font-black tabular-nums text-amber-400 leading-none">
+                                    {currentBurnTimeS.toFixed(2)}
+                                </span>
+                                <span className="text-xs text-white/30">s</span>
+                            </>
+                        ) : (
+                            <LoadingSpinner />
+                        )}
                     </div>
                 </div>
             </div>
