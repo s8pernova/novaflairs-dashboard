@@ -5,6 +5,7 @@ import "./App.css";
 import FireVectorMap, {
     type FireObservation,
 } from "./components/FireVectorMap.tsx";
+import HUD from "./components/HUD.tsx";
 
 function App() {
     const [observations, setObservations] = useState<FireObservation[]>([]);
@@ -31,6 +32,9 @@ function App() {
             <main>
                 <FireVectorMap observations={observations} />
             </main>
+            <HUD>
+                {/* Drop HUD widgets here */}
+            </HUD>
         </>
     );
 }

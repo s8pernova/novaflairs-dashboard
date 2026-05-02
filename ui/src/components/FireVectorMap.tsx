@@ -1,5 +1,6 @@
 import { type CSSProperties } from "react";
 import DeckGL from "@deck.gl/react";
+import type { MapViewState } from "@deck.gl/core";
 import { LineLayer, ScatterplotLayer } from "@deck.gl/layers";
 import Map from "react-map-gl/maplibre";
 import type { StyleSpecification } from "maplibre-gl";
@@ -130,7 +131,7 @@ const DECK_STYLE = {
     inset: "0",
 } satisfies CSSProperties;
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -77.0931,
     latitude: 38.8123,
     zoom: 15,
