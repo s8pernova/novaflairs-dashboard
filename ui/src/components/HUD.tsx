@@ -13,15 +13,7 @@ interface HUDProps {
  */
 export default function HUD({ children }: HUDProps) {
     return (
-        <div
-            id="hud-root"
-            style={{
-                position: "fixed",
-                inset: 0,
-                zIndex: 9999,
-                pointerEvents: "none",
-            }}
-        >
+        <div className="fixed z-9999 pointer-events-none inset-0">
             {children}
         </div>
     );
