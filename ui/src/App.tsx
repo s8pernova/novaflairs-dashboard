@@ -7,6 +7,7 @@ import FireVectorMap, {
 } from "./components/FireVectorMap.tsx";
 import HUD from "./components/HUD.tsx";
 import Widget from "./components/Widget.tsx";
+import PieChart from "./components/PieChart.tsx";
 
 function App() {
     const [observations, setObservations] = useState<FireObservation[]>([]);
@@ -30,13 +31,16 @@ function App() {
 
     return (
         <>
+            <HUD>
+                <Widget title="Widget 1" style="row-span-2">
+                    <PieChart />
+                </Widget>
+                <Widget title="Widget 2">Content 2</Widget>
+            </HUD>
+
             <main>
                 <FireVectorMap observations={observations} />
             </main>
-            <HUD>
-                <Widget title="Widget 1">Content 1</Widget>
-                <Widget title="Widget 2">Content 2</Widget>
-            </HUD>
         </>
     );
 }
