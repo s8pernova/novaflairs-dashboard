@@ -14,23 +14,40 @@ import FlameMetrics from "./components/FlameMetrics.tsx";
 
 function App() {
     const [observations, setObservations] = useState<FireObservation[]>([]);
+    const [avgFlameLength, setAvgFlameLength] = useState<number>(0);
+    const [avgBurnTime, setAvgBurnTime] = useState<number>(0);
+
+    const fetchObservations = async () => {
+        const response = await supabase
+            .from("telemetry_observations")
+            .select("*")
+            .limit(10);
+        if (response.error) {
+            console.error("Error fetching observations:", response.error);
+            return;
+        }
+        const data = response.data as FireObservation[];
+        setObservations(data);
+    };
+
+    const getAverageFlameLength = () => {
+        const sum = observations.reduce((acc, obs) => acc + obs.flame_length_m, 0);
+        setAvgFlameLength(sum / observations.length);
+    };
+
+    const getAverageBurnTime = () => {
+        const sum = observations.reduce((acc, obs) => acc + obs.burn_time_s, 0);
+        setAvgBurnTime(sum / observations.length);
+    };
 
     useEffect(() => {
-        const fetchObservations = async () => {
-            const response = await supabase
-                .from("telemetry_observations")
-                .select("*")
-                .limit(10);
-            if (response.error) {
-                console.error("Error fetching observations:", response.error);
-                return;
-            }
-            const data = response.data as FireObservation[];
-            setObservations(data);
-        };
-
         fetchObservations();
     }, []);
+
+    useEffect(() => {
+        getAverageFlameLength();
+        getAverageBurnTime();
+    }, [observations]);
 
     return (
         <>
@@ -48,7 +65,7 @@ function App() {
                     <WindConditions />
                 </Widget>
                 <Widget title="Flame Metrics" className="row-span-2">
-                    <FlameMetrics />
+                    <FlameMetrics currentFlameLengthM={avgFlameLength} currentBurnTimeS={avgBurnTime} />
                 </Widget>
             </HUD>
 
