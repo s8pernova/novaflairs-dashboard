@@ -32,10 +32,12 @@ function App() {
     return (
         <>
             <HUD>
-                <Widget title="Pie Chart Title" square>
+                <Widget title="Pie Chart Title" className="row-span-2">
                     <PieChart />
                 </Widget>
-                <Widget title="Widget 2">Content 2</Widget>
+                <Widget title="Widget 2">
+                    Content 2
+                </Widget>
             </HUD>
 
             <main>
