@@ -84,7 +84,7 @@ function getRiskColor(
     const probability = d.crossing_probability;
 
     if (probability === null || probability === undefined) {
-        return [235, 235, 235, 230];
+        return [239, 68, 68, 255];
     }
 
     if (probability >= 0.45) return [230, 35, 35, 235];
@@ -125,7 +125,6 @@ export default function FireVectorMap({
             radiusUnits: "pixels",
             radiusMinPixels: 5,
             radiusMaxPixels: 11,
-            stroked: true,
             filled: true,
             getFillColor: getRiskColor,
             getLineColor: [18, 24, 30, 240],
