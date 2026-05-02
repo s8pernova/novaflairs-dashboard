@@ -37,8 +37,8 @@ const MOCK_READINGS: FlameReading[] = [
 ];
 
 function flameColor(len: number): string {
-    if (len < 3)  return "#facc15"; // yellow — low
-    if (len < 6)  return "#f97316"; // orange — moderate
+    if (len < 3) return "#facc15"; // yellow — low
+    if (len < 6) return "#f97316"; // orange — moderate
     return "#ef4444";               // red — severe
 }
 
@@ -61,9 +61,9 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 export default function FlameMetrics({
-    readings             = MOCK_READINGS,
-    currentFlameLengthM  = 8.0,
-    currentBurnTimeS     = 112,
+    readings = MOCK_READINGS,
+    currentFlameLengthM,
+    currentBurnTimeS,
 }: FlameMetricsProps) {
     return (
         <div className="flex flex-col h-full gap-3 pointer-events-auto">
