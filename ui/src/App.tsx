@@ -32,7 +32,7 @@ function App() {
     return (
         <>
             <HUD>
-                <Widget title="Widget 1" style="row-span-2">
+                <Widget title="Pie Chart Title" square>
                     <PieChart />
                 </Widget>
                 <Widget title="Widget 2">Content 2</Widget>
