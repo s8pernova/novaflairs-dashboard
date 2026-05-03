@@ -40,6 +40,7 @@ function App() {
     }, [observations]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching on mount is a legitimate pattern in plain React
         fetchObservations();
     }, [fetchObservations]);
 
