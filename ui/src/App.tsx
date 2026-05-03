@@ -8,7 +8,6 @@ import FireVectorMap, {
 import HUD from "./components/HUD.tsx";
 import Widget from "./components/Widget.tsx";
 import CrossingProbabilityGauge from "./components/CrossingProbabilityGauge.tsx";
-import RiskTimeline from "./components/RiskTimeline.tsx";
 import WindConditions from "./components/WindConditions.tsx";
 import FlameMetrics from "./components/FlameMetrics.tsx";
 
