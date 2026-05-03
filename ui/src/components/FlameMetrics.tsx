@@ -54,7 +54,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
     const d = payload[0].payload;
     return (
         <div className="bg-slate-900/90 border border-white/10 rounded-lg px-3 py-2 text-xs space-y-1">
-            <p className="text-white/50">{label}</p>
+            <p className="">{label}</p>
             <p className="text-orange-400 font-bold">Flame: {d.flameLengthM.toFixed(1)} m</p>
             <p className="text-yellow-400 font-bold">Burn: {d.burnTimeS}s</p>
         </div>
@@ -72,7 +72,7 @@ export default function FlameMetrics({
             {/* Stat row */}
             <div className="grid grid-cols-2 gap-2">
                 <div className="bg-white/5 rounded-xl px-3 py-2 flex flex-col">
-                    <span className="text-[9px] text-white/30 uppercase tracking-widest">Flame Length</span>
+                    <span className="text-[9px] uppercase tracking-widest">Flame Length</span>
                     <div className="flex items-baseline gap-1 mt-0.5">
                         {currentFlameLengthM ? (
                             <>
@@ -82,7 +82,7 @@ export default function FlameMetrics({
                                 >
                                     {currentFlameLengthM.toFixed(2)}
                                 </span>
-                                <span className="text-xs text-white/30">m</span>
+                                <span className="text-xs ">m</span>
                             </>
                         ) : (
                             <LoadingSpinner />
@@ -90,14 +90,14 @@ export default function FlameMetrics({
                     </div>
                 </div>
                 <div className="bg-white/5 rounded-xl px-3 py-2 flex flex-col">
-                    <span className="text-[9px] text-white/30 uppercase tracking-widest">Burn Duration</span>
+                    <span className="text-[9px]  uppercase tracking-widest">Burn Duration</span>
                     <div className="flex items-baseline gap-1 mt-0.5">
                         {currentBurnTimeS ? (
                             <>
                                 <span className="text-2xl font-black tabular-nums text-amber-400 leading-none">
                                     {currentBurnTimeS.toFixed(2)}
                                 </span>
-                                <span className="text-xs text-white/30">s</span>
+                                <span className="text-xs ">s</span>
                             </>
                         ) : (
                             <LoadingSpinner />

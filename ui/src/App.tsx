@@ -65,15 +65,6 @@ function App() {
                 className: "row-span-2",
             },
             {
-                title: "Risk Timeline",
-                component: RiskTimeline,
-                props: {
-                    crossingProbability: 0.62,
-                    predictedCrossed: "YES",
-                },
-                className: "row-span-2",
-            },
-            {
                 title: "Wind Conditions",
                 component: WindConditions,
                 props: {

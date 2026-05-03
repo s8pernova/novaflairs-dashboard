@@ -94,7 +94,7 @@ export default function CrossingProbabilityGauge({
                     >
                         {pct}%
                     </span>
-                    <span className="text-[10px] text-white/40 tracking-widest uppercase mt-2">
+                    <span className="text-[10px] tracking-widest uppercase mt-2">
                         Crossing Probability
                     </span>
                 </div>

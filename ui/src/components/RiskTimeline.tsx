@@ -47,7 +47,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
     const val = payload[0].value;
     return (
         <div className="bg-slate-900/90 border border-white/10 rounded-lg px-3 py-2 text-xs">
-            <p className="text-white/50 mb-0.5">{label}</p>
+            <p className=" mb-0.5">{label}</p>
             <p className="text-white font-bold">{Math.round(val * 100)}% probability</p>
         </div>
     );
@@ -67,7 +67,7 @@ export default function RiskTimeline({
     return (
         <div className="flex flex-col h-full gap-2 pointer-events-auto">
             <div className="flex items-baseline justify-between px-1">
-                <span className="text-[11px] text-white/40 uppercase tracking-widest">Last 60 min</span>
+                <span className="text-[11px]  uppercase tracking-widest">Last 60 min</span>
                 <span className="text-xs font-semibold" style={{ color: trendColor }}>
                     {trending}
                 </span>
@@ -78,7 +78,7 @@ export default function RiskTimeline({
                     <AreaChart data={data} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                         <defs>
                             <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%"  stopColor="#ef4444" stopOpacity={0.4} />
+                                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
                                 <stop offset="95%" stopColor="#ef4444" stopOpacity={0.02} />
                             </linearGradient>
                         </defs>
