@@ -4,7 +4,7 @@ set -Eeuo pipefail
 APP_NAME="novaflairs"
 APP_DIR="/srv/novaflairs-dashboard"
 COMPOSE_FILE="$APP_DIR/infra/docker-compose.yml"
-COMPOSE_ENV="/etc/novaflairs-dashboard/compose.env"
+COMPOSE_ENV="/etc/novaflairs/compose.env"
 
 compose() {
   docker compose \
