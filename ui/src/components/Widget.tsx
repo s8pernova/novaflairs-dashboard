@@ -8,7 +8,7 @@ interface WidgetProps {
 
 export default function Widget({ title, children, className }: WidgetProps) {
     return (
-        <div className={`${className} p-5 rounded-4xl flex flex-col`}>
+        <div className={`${className} bg-blue-300/10 p-5 rounded-4xl flex flex-col`}>
             <h1 className="text-xs font-bold uppercase tracking-widest mb-3 shrink-0">
                 {title}
             </h1>

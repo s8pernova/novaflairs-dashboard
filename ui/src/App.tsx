@@ -49,24 +49,62 @@ function App() {
         getAverageBurnTime();
     }, [observations]);
 
+    const widgets: Array<{
+        title: string;
+        component: React.ComponentType;
+        props: Record<string, unknown>;
+        className?: string;
+    }> = [
+            {
+                title: "Crossing Risk",
+                component: CrossingProbabilityGauge,
+                props: {
+                    crossingProbability: 0.62,
+                    predictedCrossed: "YES",
+                },
+                className: "row-span-2",
+            },
+            {
+                title: "Risk Timeline",
+                component: RiskTimeline,
+                props: {
+                    crossingProbability: 0.62,
+                    predictedCrossed: "YES",
+                },
+                className: "row-span-2",
+            },
+            {
+                title: "Wind Conditions",
+                component: WindConditions,
+                props: {
+                    windSpeed: 10,
+                    windDirection: "NW",
+                },
+            },
+            {
+                title: "Flame Metrics",
+                component: FlameMetrics,
+                props: {
+                    currentFlameLengthM: avgFlameLength,
+                    currentBurnTimeS: avgBurnTime,
+                },
+                className: "row-span-2",
+            },
+        ];
+
     return (
         <>
             <HUD>
-                <Widget title="Crossing Risk" className="row-span-2">
-                    <CrossingProbabilityGauge
-                        crossingProbability={0.62}
-                        predictedCrossed="YES"
-                    />
-                </Widget>
-                <Widget title="Risk Timeline" className="col-span-2 row-span-2">
-                    <RiskTimeline />
-                </Widget>
-                <Widget title="Wind Conditions">
-                    <WindConditions />
-                </Widget>
-                <Widget title="Flame Metrics" className="row-span-2">
-                    <FlameMetrics currentFlameLengthM={avgFlameLength} currentBurnTimeS={avgBurnTime} />
-                </Widget>
+                {widgets.map((widget, index) => {
+                    const Component = widget.component;
+                    return (
+                        <Widget key={index} title={widget.title} className={widget.className}>
+                            <Component {...widget.props} />
+                        </Widget>
+                    )
+                })}
+
+                {/* Maybe add predictions on where downwords sloping winds are? */}
             </HUD>
 
             <main>
