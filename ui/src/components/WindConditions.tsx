@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 interface WindConditionsProps {
     /** m/s from telemetry_observations.wind_speed_2m_mps */
     windSpeedMps?: number;
@@ -31,8 +33,12 @@ export default function WindConditions({
     windDirectionDeg = 247,
     qualityScore = 0.87,
     droneId = "DRONE-04",
-    observedAt = new Date(Date.now() - 18000).toISOString(),
+    observedAt,
 }: WindConditionsProps) {
+    const resolvedObservedAt = useMemo(
+        () => observedAt ?? new Date(Date.now() - 18000).toISOString(),
+        [observedAt],
+    );
     const kph = mpsToKph(windSpeedMps);
     const cardinal = degreesToCardinal(windDirectionDeg);
     const isStale = qualityScore !== undefined && qualityScore < 0.6;
@@ -110,7 +116,7 @@ export default function WindConditions({
                         <span className={`w-1.5 h-1.5 rounded-full ${isStale ? "bg-red-500" : "bg-green-400 animate-pulse"}`} />
                         <span className="text-[10px]  font-mono">{droneId}</span>
                     </div>
-                    <span className="text-[10px] ">{timeAgo(observedAt)}</span>
+                    <span className="text-[10px] ">{timeAgo(resolvedObservedAt)}</span>
                 </div>
 
                 {/* Signal quality bar */}

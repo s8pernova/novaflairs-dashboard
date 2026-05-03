@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "./clients/supabaseClient.ts";
 
 import "./App.css";
@@ -13,10 +13,8 @@ import FlameMetrics from "./components/FlameMetrics.tsx";
 
 function App() {
     const [observations, setObservations] = useState<FireObservation[]>([]);
-    const [avgFlameLength, setAvgFlameLength] = useState<number>(0);
-    const [avgBurnTime, setAvgBurnTime] = useState<number>(0);
 
-    const fetchObservations = async () => {
+    const fetchObservations = useCallback(async () => {
         const response = await supabase
             .from("telemetry_observations")
             .select("*")
@@ -27,26 +25,23 @@ function App() {
         }
         const data = response.data as FireObservation[];
         setObservations(data);
-    };
+    }, []);
 
-    const getAverageFlameLength = () => {
+    const avgFlameLength = useMemo(() => {
+        if (observations.length === 0) return 0;
         const sum = observations.reduce((acc, obs) => acc + obs.flame_length_m, 0);
-        setAvgFlameLength(sum / observations.length);
-    };
+        return sum / observations.length;
+    }, [observations]);
 
-    const getAverageBurnTime = () => {
+    const avgBurnTime = useMemo(() => {
+        if (observations.length === 0) return 0;
         const sum = observations.reduce((acc, obs) => acc + obs.burn_time_s, 0);
-        setAvgBurnTime(sum / observations.length);
-    };
+        return sum / observations.length;
+    }, [observations]);
 
     useEffect(() => {
         fetchObservations();
-    }, []);
-
-    useEffect(() => {
-        getAverageFlameLength();
-        getAverageBurnTime();
-    }, [observations]);
+    }, [fetchObservations]);
 
     const widgets: Array<{
         title: string;
