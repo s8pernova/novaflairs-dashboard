@@ -34,9 +34,10 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED}
-      DB_CA_CERT: ${DB_CA_CERT}
+      DB_CA_CERT: /certs/supabase-ca.pem
     volumes:
       - ../nodered:/data
+      - ${DB_CA_CERT_PATH:-/etc/novaflairs/supabase-ca.pem}:/certs/supabase-ca.pem:ro
 
   metabase:
     container_name: novaflairs-metabase
