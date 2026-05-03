@@ -4,6 +4,9 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.ui
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
     image: novaflairs-dashboard-ui:local
     restart: unless-stopped
     ports:
