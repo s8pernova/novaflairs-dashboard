@@ -59,7 +59,7 @@ export default function WindConditions({
                     ].map(({ label, ...style }) => (
                         <span
                             key={label}
-                            className="absolute text-[8px] text-white/25 font-bold"
+                            className="absolute text-[8px]  font-bold"
                             style={style as React.CSSProperties}
                         >
                             {label}
@@ -92,13 +92,13 @@ export default function WindConditions({
                 <div className="flex flex-col gap-0.5">
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-3xl font-black text-white tabular-nums leading-none">{kph}</span>
-                        <span className="text-xs text-white/40 font-medium">km/h</span>
+                        <span className="text-xs  font-medium">km/h</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-orange-400">{cardinal}</span>
-                        <span className="text-xs text-white/30">{windDirectionDeg.toFixed(0)}°</span>
+                        <span className="text-xs ">{windDirectionDeg.toFixed(0)}°</span>
                     </div>
-                    <span className="text-[10px] text-white/25 mt-0.5">{windSpeedMps.toFixed(1)} m/s</span>
+                    <span className="text-[10px]  mt-0.5">{windSpeedMps.toFixed(1)} m/s</span>
                 </div>
             </div>
 
@@ -108,14 +108,14 @@ export default function WindConditions({
                     <div className="flex items-center gap-1.5">
                         {/* Live dot */}
                         <span className={`w-1.5 h-1.5 rounded-full ${isStale ? "bg-red-500" : "bg-green-400 animate-pulse"}`} />
-                        <span className="text-[10px] text-white/40 font-mono">{droneId}</span>
+                        <span className="text-[10px]  font-mono">{droneId}</span>
                     </div>
-                    <span className="text-[10px] text-white/30">{timeAgo(observedAt)}</span>
+                    <span className="text-[10px] ">{timeAgo(observedAt)}</span>
                 </div>
 
                 {/* Signal quality bar */}
                 <div className="flex items-center gap-2">
-                    <span className="text-[9px] text-white/25 uppercase tracking-widest w-10">Signal</span>
+                    <span className="text-[9px]  uppercase tracking-widest w-10">Signal</span>
                     <div className="flex-1 h-1 rounded-full bg-white/8 overflow-hidden">
                         <div
                             className="h-full rounded-full transition-all duration-700"
