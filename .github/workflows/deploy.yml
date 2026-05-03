@@ -5,7 +5,9 @@ on:
   push:
     branches: ["main"]
     paths:
-      # - "nodered/**"
+      - "ui/**"
+      - "nodered/**"
+      - "infra/**"
       - ".github/workflows/deploy.yml"
 
 concurrency:
@@ -18,6 +20,14 @@ jobs:
     timeout-minutes: 45
 
     steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:deploy
+          ping: ${{ secrets.VM_HOST }}
+
       - name: Deploy to VM over SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -28,43 +38,4 @@ jobs:
           command_timeout: 45m
           script_stop: true
           script: |
-            set -euo pipefail
-
-            REPO_DIR=/opt/novaflairs-dashboard
-            DATA_DIR=/opt/node-red-data
-            CONTAINER_NAME=nodered
-            IMAGE_NAME=nodered/node-red:latest
-
-            cd "$REPO_DIR"
-            git fetch --all --prune
-            git reset --hard origin/main
-
-            mkdir -p "$DATA_DIR"
-
-            docker pull "$IMAGE_NAME"
-            docker rm -f "$CONTAINER_NAME" || true
-
-            rsync -rlptD --delete \
-              --exclude '.git/' \
-              "$REPO_DIR/nodered/" "$DATA_DIR/"
-
-            docker run --rm \
-              --entrypoint /bin/sh \
-              --user "$(id -u):$(id -g)" \
-              -e HOME=/tmp \
-              -e npm_config_cache=/tmp/.npm \
-              -v "$DATA_DIR:/data" \
-              "$IMAGE_NAME" \
-              -lc 'cd /data && rm -rf node_modules && npm ci --omit=dev'
-
-            docker run -d \
-              --name "$CONTAINER_NAME" \
-              --restart unless-stopped \
-              --user "$(id -u):$(id -g)" \
-              -p 127.0.0.1:1880:1880 \
-              -v "$DATA_DIR:/data" \
-              "$IMAGE_NAME"
-
-            sleep 10
-            docker ps --filter "name=$CONTAINER_NAME"
-            docker logs --tail=120 "$CONTAINER_NAME" || true
+            bash /srv/novaflairs-dashboard/infra/deploy/deploy.sh
