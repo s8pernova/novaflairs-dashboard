@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+// Fallback timestamp computed once at module load — avoids impure Date.now() during render.
+const FALLBACK_OBSERVED_AT = new Date(Date.now() - 18000).toISOString();
 
 interface WindConditionsProps {
     /** m/s from telemetry_observations.wind_speed_2m_mps */
@@ -35,10 +36,7 @@ export default function WindConditions({
     droneId = "DRONE-04",
     observedAt,
 }: WindConditionsProps) {
-    const resolvedObservedAt = useMemo(
-        () => observedAt ?? new Date(Date.now() - 18000).toISOString(),
-        [observedAt],
-    );
+    const resolvedObservedAt = observedAt ?? FALLBACK_OBSERVED_AT;
     const kph = mpsToKph(windSpeedMps);
     const cardinal = degreesToCardinal(windDirectionDeg);
     const isStale = qualityScore !== undefined && qualityScore < 0.6;
