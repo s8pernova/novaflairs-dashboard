@@ -34,12 +34,12 @@ trap 'fail $LINENO' ERR
 
 cd "$APP_DIR"
 
-# ── Pull latest code ────────────────────────────────────────────────────────
+# Pull latest code 
 log "Pulling latest code"
 git fetch --all --prune
 git reset --hard origin/main
 
-# ── Validate required files ─────────────────────────────────────────────────
+# Validate required files 
 log "Validating required files"
 test -f "$COMPOSE_FILE"
 test -f "$COMPOSE_ENV"
@@ -50,14 +50,14 @@ docker ps >/dev/null
 log "Validating Docker Compose config"
 compose config -q
 
-# ── Build and deploy ────────────────────────────────────────────────────────
+# Build and deploy 
 log "Building images"
 compose --progress=plain build --pull
 
 log "Starting containers"
 compose up -d --remove-orphans
 
-# ── Verify ──────────────────────────────────────────────────────────────────
+# Verify 
 log "Waiting for containers to stabilize"
 sleep 10
 

@@ -1,12 +1,10 @@
-#  Novaflairs Dashboard – Frontend Dockerfile
+# Novaflairs Dashboard – Frontend Dockerfile
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Stage 1 · Builder  (Node)
-# ──────────────────────────────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
 # Supabase credentials — baked into the JS bundle by Vite at build time.
-# Passed via docker compose build args → only exist in the builder stage.
+# Passed via docker compose build args to only exist in the builder stage.
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
@@ -23,12 +21,10 @@ RUN npm ci --prefer-offline
 # Copy the rest of the UI source.
 COPY ui/ ./
 
-# TypeScript compile + Vite bundle → output lands in /app/dist
+# TypeScript compile + Vite bundle to output lands in /app/dist
 RUN npm run build
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Stage 2 · Runtime  (Nginx)
-# ──────────────────────────────────────────────────────────────────────────────
 FROM nginx:1.27-alpine AS runtime
 
 LABEL maintainer="novaflairs" \
