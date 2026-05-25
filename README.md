@@ -31,7 +31,7 @@
 
 ### Docker Build (Production)
 
-All Docker infrastructure lives in `infra/`. The compose stack runs three services:
+The compose stack runs three services:
 
 | Service | Port | Description |
 |---------|------|-------------|
@@ -68,7 +68,6 @@ All Docker infrastructure lives in `infra/`. The compose stack runs three servic
 2. **Build and start**
 
    ```bash
-   cd infra
    docker compose up -d --build
    ```
 

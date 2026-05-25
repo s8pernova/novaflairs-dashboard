@@ -2,7 +2,7 @@ services:
   ui:
     container_name: novaflairs-ui
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.ui
       args:
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
@@ -17,7 +17,7 @@ services:
   nodered:
     container_name: novaflairs-nodered
     build:
-      context: ..
+      context: .
       dockerfile: nodered/Dockerfile
     image: novaflairs-dashboard-nodered:local
     restart: unless-stopped
@@ -36,7 +36,7 @@ services:
       DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED}
       DB_CA_CERT: /certs/supabase-ca.pem
     volumes:
-      - ../nodered:/data
+      - ./nodered:/data
       - ${DB_CA_CERT_PATH:-/etc/novaflairs/supabase-ca.pem}:/certs/supabase-ca.pem:ro
 
   metabase:
