@@ -12,7 +12,7 @@ services:
     ports:
       - "8080:80"
     environment:
-      TZ: America/New_York
+      TZ: ${TZ:-America/New_York}
 
   nodered:
     container_name: novaflairs-nodered
@@ -22,22 +22,17 @@ services:
     image: novaflairs-dashboard-nodered:local
     restart: unless-stopped
     user: "${PUID}:${PGID}"
+    env_file:
+      - nodered/.env
     ports:
       - "1880:1880"
     environment:
-      TZ: America/New_York
-      NODE_RED_CREDENTIAL_SECRET: ${NODE_RED_CREDENTIAL_SECRET}
-      NODE_RED_ADMIN_PASSWORD: ${NODE_RED_ADMIN_PASSWORD}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED}
+      TZ: ${TZ:-America/New_York}
       DB_CA_CERT: /certs/supabase-ca.pem
+      NODE_EXTRA_CA_CERTS: /certs/supabase-ca.pem
     volumes:
       - ./nodered:/data
-      - ${DB_CA_CERT_PATH:-/etc/novaflairs/supabase-ca.pem}:/certs/supabase-ca.pem:ro
+      - ${NODE_RED_DB_CA_CERT_PATH:-/etc/novaflairs/supabase-ca.pem}:/certs/supabase-ca.pem:ro
 
   metabase:
     container_name: novaflairs-metabase
@@ -48,6 +43,7 @@ services:
     environment:
       MB_DB_FILE: /metabase-data/metabase.db
       MB_JETTY_HOST: 0.0.0.0
+      TZ: ${TZ:-America/New_York}
     volumes:
       - metabase_data:/metabase-data
 

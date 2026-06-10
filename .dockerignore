@@ -239,6 +239,16 @@ test*
 # Browser session data (contains cookies and login sessions)
 __browser_data__/
 
+# Node-RED local runtime state and credentials
+nodered/flows_cred.json
+nodered/.config*.json
+nodered/*.backup
+nodered/.flows*.backup
+nodered/.sessions.json
+nodered/.storage/
+nodered/context/
+nodered/lib/flows/
+
 # Custom
 conversation.txt
 *unittest*.py

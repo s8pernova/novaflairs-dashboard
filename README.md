@@ -41,29 +41,42 @@ The compose stack runs three services:
 
 1. **Configure environment**
 
-   Copy and fill out the root `.env` file with production values:
+   Copy and fill out the root `.env` file with Docker Compose values:
+
+   ```bash
+   cp .env.example .env
+   cp nodered/.env.example nodered/.env
+   ```
+
+   The root `.env` is intentionally limited to orchestration and
+   browser-visible UI build values:
 
    ```
-   # Node-RED
-   NODE_RED_CREDENTIAL_SECRET=...
-   NODE_RED_ADMIN_PASSWORD=...
-
-   # Database (Supabase Postgres)
-   DB_USER=...
-   DB_PASSWORD=...
-   DB_PORT=5432
-   DB_NAME=...
-   DB_HOST=...
-   DB_SSL_REJECT_UNAUTHORIZED=true
-
-   # User/Group for Node-RED container
+   TZ=America/New_York
    PUID=1001
    PGID=1001
+   NODE_RED_DB_CA_CERT_PATH=/etc/novaflairs/supabase-ca.pem
 
-   # UI Build Args
    VITE_SUPABASE_URL=...
    VITE_SUPABASE_ANON_KEY=...
    ```
+
+   Node-RED secrets and database credentials belong in `nodered/.env`:
+
+   ```
+   NODE_RED_ADMIN_USER=admin
+   NODE_RED_CREDENTIAL_SECRET=...
+   NODE_RED_ADMIN_PASSWORD='...' # bcrypt hash, not a plain-text password
+
+   DB_HOST=...
+   DB_PORT=5432
+   DB_NAME=...
+   DB_USER=...
+   DB_PASSWORD='...'
+   DB_SSL_REJECT_UNAUTHORIZED=true
+   ```
+
+   See `docs/secrets.md` for the full environment file policy.
 
 2. **Build and start**
 

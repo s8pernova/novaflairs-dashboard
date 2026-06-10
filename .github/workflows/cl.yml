@@ -75,7 +75,9 @@ jobs:
       - name: Validate flows JSON
         run: |
           jq empty nodered/flows.json
-          jq empty nodered/flows_cred.json
+          test ! -e nodered/flows_cred.json
+          test ! -e nodered/.config.runtime.json
+          test ! -e nodered/.config.users.json
 
       - name: Validate settings.js syntax
         run: node --check nodered/settings.js
@@ -86,6 +88,14 @@ jobs:
             --name nodered-smoke \
             -p 1881:1880 \
             -e NODE_RED_ENABLE_SAFE_MODE=true \
+            -e NODE_RED_CREDENTIAL_SECRET=ci-only-credential-secret \
+            -e 'NODE_RED_ADMIN_PASSWORD=$2a$08$zZWtXTja0fB1pzD4sHCMyOCMYz2Z6dNbM6tl8sJogENOMcxWV9DN.' \
+            -e DB_HOST=localhost \
+            -e DB_PORT=5432 \
+            -e DB_NAME=postgres \
+            -e DB_USER=postgres \
+            -e DB_PASSWORD=postgres \
+            -e DB_SSL_REJECT_UNAUTHORIZED=false \
             -v "$GITHUB_WORKSPACE/nodered:/data" \
             nodered/node-red:latest
 
