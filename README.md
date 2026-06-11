@@ -33,11 +33,11 @@
 
 The compose stack runs three services:
 
-| Service | Port | Description |
-|---------|------|-------------|
-| **UI** | `8080` | Vite-built React app served via Nginx |
-| **Node-RED** | `1880` | Automation / data pipelines |
-| **Metabase** | `3000` | Analytics and dashboards |
+| Service      | Port   | Description                           |
+| ------------ | ------ | ------------------------------------- |
+| **UI**       | `8080` | Vite-built React app served via Nginx |
+| **Node-RED** | `1880` | Automation / data pipelines           |
+| **Metabase** | `3000` | Analytics and dashboards              |
 
 1. **Configure environment**
 
@@ -53,8 +53,8 @@ The compose stack runs three services:
 
    ```
    TZ=America/New_York
-   PUID=1001
-   PGID=1001
+   PUID=1000
+   PGID=1000
    NODE_RED_DB_CA_CERT_PATH=/etc/novaflairs/supabase-ca.pem
 
    VITE_SUPABASE_URL=...
@@ -76,7 +76,8 @@ The compose stack runs three services:
    DB_SSL_REJECT_UNAUTHORIZED=true
    ```
 
-   See `docs/secrets.md` for the full environment file policy.
+   See `docs/adr/0003-keep-secrets-scoped-to-runtime.md` for the full
+   environment file policy.
 
 2. **Build and start**
 
@@ -85,7 +86,9 @@ The compose stack runs three services:
    ```
 
 3. **Verify**
-
    - UI: http://localhost:8080
    - Node-RED: http://localhost:1880
    - Metabase: http://localhost:3000
+
+   Node-RED stores mutable runtime data in the `node_red_data` Docker volume.
+   The repo contains only the seed files copied into that volume on first run.

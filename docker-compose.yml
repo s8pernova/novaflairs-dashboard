@@ -31,7 +31,7 @@ services:
       DB_CA_CERT: /certs/supabase-ca.pem
       NODE_EXTRA_CA_CERTS: /certs/supabase-ca.pem
     volumes:
-      - ./nodered:/data
+      - node_red_data:/data
       - ${NODE_RED_DB_CA_CERT_PATH:-/etc/novaflairs/supabase-ca.pem}:/certs/supabase-ca.pem:ro
 
   metabase:
@@ -49,4 +49,5 @@ services:
 
 volumes:
   node_red_data:
+    name: novaflairs_node_red_data
   metabase_data:
