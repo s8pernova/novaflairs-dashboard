@@ -40,7 +40,8 @@ Decision details:
 - The existing Vite React dashboard may remain in `ui/` while React Native is introduced.
 - The React Native app should consume the same telemetry, prediction, and scenario data contracts as the current dashboard.
 - Shared validation rules, API clients, schemas, and types should be factored into shared packages when duplication appears.
-- The exact React Native project setup, such as Expo versus bare React Native, can be decided during implementation.
+- The first React Native implementation should prefer Expo unless a concrete native capability requires a bare React Native setup.
+- The mobile app should be added inside this repository, such as `apps/mobile/`, instead of becoming a separate Windows-side project.
 
 In scope:
 
@@ -88,6 +89,16 @@ React Native fits the next phase of NOVAflair better than a web-only dashboard b
 - The current Vite app can continue to be built and deployed while React Native is developed.
 - React Native build and release automation should be added only when there is a real app target to ship.
 
+### Local Android development
+
+- Android Studio should be treated as the Android SDK, emulator, and AVD management tool, not as the required code editor.
+- On Windows developer machines, the Android Emulator should run on Windows through Android Studio.
+- Repository source, package manager commands, tests, and app development commands should continue to run from WSL for this repo.
+- WSL should be configured to communicate with the Windows Android Debug Bridge (`adb`) server so the WSL-based React Native or Expo dev server can install and open the app on the Windows-hosted emulator.
+- Duplicating the mobile project onto the Windows filesystem is acceptable only for disposable toolchain experiments. It should not become the authoritative implementation path for NOVAflair.
+- A tablet Android Virtual Device is an appropriate first target because the operator app is expected to be a field console. Phone and physical-device testing should be added before release.
+- The first mobile milestone should render a static or fake-data operator console before integrating backend, Supabase, Node-RED, or hardware data.
+
 ## Consequences
 
 Positive:
@@ -105,7 +116,8 @@ Negative:
 
 Follow-ups:
 
-- [ ] Decide whether the first React Native app should use Expo.
+- [ ] Verify a Windows Android Emulator can be reached from WSL through `adb`.
+- [ ] Create the first React Native app with Expo unless a specific native requirement blocks it.
 - [ ] Add an `apps/mobile/` or equivalent project when implementation starts.
 - [ ] Identify shared dashboard/app data contracts that should move into a shared package.
 - [ ] Decide when the Vite dashboard becomes secondary, internal-only, or retired.
@@ -124,7 +136,9 @@ Follow-ups:
 ## Rollout plan
 
 1. Keep the current Vite dashboard running as the reference UI.
-2. Start a React Native app when the first app-specific workflow is ready.
-3. Share types, validation, and API clients once duplication appears between the web and mobile UIs.
-4. Move operator-facing workflows into the React Native app over time.
-5. Decide whether the web dashboard remains as an internal/admin surface or is retired.
+2. Confirm the Android Studio emulator and WSL `adb` workflow before adding app code.
+3. Start an Expo React Native app in `apps/mobile/` when the first app-specific workflow is ready.
+4. Build the first operator-console screen with fake telemetry and prediction data.
+5. Share types, validation, and API clients once duplication appears between the web and mobile UIs.
+6. Move operator-facing workflows into the React Native app over time.
+7. Decide whether the web dashboard remains as an internal/admin surface or is retired.
