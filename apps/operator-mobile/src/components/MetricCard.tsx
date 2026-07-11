@@ -9,8 +9,7 @@ interface MetricCardProps {
 
 export function MetricCard({ accent, label, value, detail }: MetricCardProps) {
     return (
-        <View style={styles.card}>
-            <View style={[styles.accent, { backgroundColor: accent }]} />
+        <View style={[styles.card, { borderColor: accent }]}>
             <View style={styles.copy}>
                 <Text style={styles.label}>{label}</Text>
                 <Text
@@ -33,11 +32,7 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         borderRadius: 6,
         borderWidth: 1,
-        borderColor: "#29323a",
         backgroundColor: "#192128",
-    },
-    accent: {
-        width: 4,
     },
     copy: {
         flex: 1,
