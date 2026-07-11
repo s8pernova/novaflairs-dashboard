@@ -3,17 +3,31 @@ name: CI
 on:
   pull_request:
     paths:
+      - "backend/**"
       - "ui/**"
       - "nodered/**"
       - "infra/**"
+      - "supabase/**"
+      - "scripts/check_supabase_layout.py"
+      - "scripts/tests/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".nvmrc"
       - ".github/workflows/cl.yml"
       - ".github/workflows/deploy.yml"
   push:
-    branches: ["main"]
+    branches: ["main", "dev"]
     paths:
+      - "backend/**"
       - "ui/**"
       - "nodered/**"
       - "infra/**"
+      - "supabase/**"
+      - "scripts/check_supabase_layout.py"
+      - "scripts/tests/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".nvmrc"
       - ".github/workflows/cl.yml"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
@@ -22,6 +36,36 @@ permissions:
   contents: read
 
 jobs:
+  # Supabase database infrastructure
+  supabase-validate:
+    name: Supabase · Validate Infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install locked repository tooling
+        run: npm ci --ignore-scripts
+
+      - name: Validate Supabase infrastructure
+        run: |
+          npx supabase --version
+          python -m unittest discover -s scripts/tests
+          npm run db:check-layout
+
   # UI 
   ui-lint:
     name: UI · Lint & Build

@@ -19,6 +19,11 @@ SCHEMA_SQL = re.compile(
     r"\b(create|alter|drop|grant|revoke|truncate)\b",
     re.IGNORECASE,
 )
+READ_QUERY_MUTATION = re.compile(
+    r"\b(alter|call|copy|create|delete|do|drop|grant|insert|merge|revoke|"
+    r"truncate|update)\b",
+    re.IGNORECASE,
+)
 SECRET_MARKERS = (
     "service_role_key",
     "supabase_access_token",
@@ -29,6 +34,13 @@ SECRET_MARKERS = (
 
 def _relative(path: Path) -> str:
     return path.relative_to(REPO_ROOT).as_posix()
+
+
+def _without_sql_comments_or_strings(sql: str) -> str:
+    """Remove SQL comments and string literals before classifying queries."""
+    without_blocks = re.sub(r"/\*.*?\*/", " ", sql, flags=re.DOTALL)
+    without_lines = re.sub(r"--.*?$", " ", without_blocks, flags=re.MULTILINE)
+    return re.sub(r"'(?:''|[^'])*'", "''", without_lines)
 
 
 def main() -> int:
@@ -96,6 +108,30 @@ def main() -> int:
         sql = path.read_text(encoding="utf-8")
         if SCHEMA_SQL.search(sql):
             errors.append(f"seed contains schema or privilege SQL: {_relative(path)}")
+
+    read_queries = sorted((QUERIES_ROOT / "read").glob("*.sql"))
+    if not read_queries:
+        errors.append("supabase/queries/read contains no read-only queries")
+    for path in read_queries:
+        sql = _without_sql_comments_or_strings(path.read_text(encoding="utf-8"))
+        if READ_QUERY_MUTATION.search(sql):
+            errors.append(f"read-only query contains a mutation: {_relative(path)}")
+
+    verification_queries = sorted((QUERIES_ROOT / "verify").glob("*.sql"))
+    if not verification_queries:
+        errors.append("supabase/queries/verify contains no verification queries")
+    for path in verification_queries:
+        sql = _without_sql_comments_or_strings(
+            path.read_text(encoding="utf-8")
+        ).strip()
+        if READ_QUERY_MUTATION.search(sql):
+            errors.append(f"verification query contains a mutation: {_relative(path)}")
+        if not re.match(r"^BEGIN\s*;", sql, flags=re.IGNORECASE):
+            errors.append(f"verification query must begin a transaction: {_relative(path)}")
+        if not re.search(r"ROLLBACK\s*;\s*$", sql, flags=re.IGNORECASE):
+            errors.append(f"verification query must end with rollback: {_relative(path)}")
+        if re.search(r"\bCOMMIT\b", sql, flags=re.IGNORECASE):
+            errors.append(f"verification query must not commit: {_relative(path)}")
 
     for path in SUPABASE_ROOT.rglob("*.sql"):
         lowered = path.read_text(encoding="utf-8").lower()

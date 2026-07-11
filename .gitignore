@@ -235,6 +235,9 @@ test*
 !backend/tests/
 !backend/tests/test_*.py
 !backend/tests/**/test_*.py
+!scripts/tests/
+!scripts/tests/test_*.py
+!scripts/tests/**/test_*.py
 
 # Browser session data (contains cookies and login sessions)
 __browser_data__/
