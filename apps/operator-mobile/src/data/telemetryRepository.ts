@@ -1,5 +1,5 @@
-import { mockObservations } from "./mockObservations";
-import type { TelemetryObservation } from "../domain/telemetry";
+import { mockObservations } from "@/data/mockObservations";
+import type { TelemetryObservation } from "@/domain/telemetry";
 
 export async function getTelemetryObservations(): Promise<
     TelemetryObservation[]

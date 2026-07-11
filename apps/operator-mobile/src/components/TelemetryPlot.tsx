@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import type { TelemetryObservation } from "../domain/telemetry";
+import type { TelemetryObservation } from "@/domain/telemetry";
 
 interface TelemetryPlotProps {
     observations: TelemetryObservation[];

@@ -1,4 +1,4 @@
-import type { TelemetryObservation } from "../domain/telemetry";
+import type { TelemetryObservation } from "@/domain/telemetry";
 
 export const mockObservations: TelemetryObservation[] = [
     {

@@ -33,7 +33,7 @@ and app-store submission are deliberately deferred.
 
 ## 1. Establish the maintainable app structure
 
-- [ ] Move the dashboard screen from `App.tsx` to
+- [x] Move the dashboard screen from `App.tsx` to
       `src/screens/OperatorDashboardScreen.tsx`; keep `App.tsx` as the thin app
       entrypoint.
 - [ ] Add `src/theme/tokens.ts` for shared colors, spacing, typography, borders,

@@ -9,13 +9,13 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
-import { MetricCard } from "../components/MetricCard";
-import { TelemetryPlot } from "../components/TelemetryPlot";
-import { getTelemetryObservations } from "../data/telemetryRepository";
+import { MetricCard } from "@/components/MetricCard";
+import { TelemetryPlot } from "@/components/TelemetryPlot";
+import { getTelemetryObservations } from "@/data/telemetryRepository";
 import {
     summarizeTelemetry,
     type TelemetryObservation,
-} from "../domain/telemetry";
+} from "@/domain/telemetry";
 
 type LoadState = "loading" | "ready" | "error";
 

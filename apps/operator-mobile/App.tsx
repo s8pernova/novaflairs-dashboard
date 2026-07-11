@@ -1,4 +1,4 @@
-import OperatorDashboardScreen from "./src/screens/OperatorDashboardScreen";
+import OperatorDashboardScreen from "@/screens/OperatorDashboardScreen";
 
 export default function App() {
     return <OperatorDashboardScreen />;
