@@ -103,7 +103,7 @@ Follow-ups:
 - [ ] <work item 1>
 - [ ] <work item 2>
 
-## Alternatives considered
+## Alternatives considered <!-- Only use if alternatives were ACTUALLY considered -->
 
 1. <alternative name>
    - Why not: <short reason>
