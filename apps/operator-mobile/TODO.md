@@ -1,9 +1,5 @@
 # Operator mobile prototype TODO
 
-This checklist defines the first complete NOVAflair operator-app prototype. Work
-through it in order: each phase leaves the app usable and creates the foundation
-for the next phase.
-
 ## Prototype definition of done
 
 The prototype is complete when an Android tablet can:
