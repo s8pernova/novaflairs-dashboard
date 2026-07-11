@@ -2,6 +2,31 @@
 
 ## Quick Start
 
+### Database Development
+
+NOVAflair uses local Supabase and keeps all executable database history under `supabase/migrations/`.
+
+```bash
+npm install
+npx supabase --version
+npm run db:check-layout
+```
+
+Start the disposable local Supabase stack when database work is needed:
+
+```bash
+npm run db:start
+npm run db:status
+```
+
+`npm run db:reset` destroys and recreates the local database, reapplies every
+migration, and loads the local demo seed. Do not run it when local database state
+must be preserved.
+
+The existing Cloud project predates Supabase migration history. Read
+`supabase/README.md` before any linked history repair or migration push. Adding
+the committed migration files does not authorize applying them to Cloud.
+
 ### Developer Setup (UI)
 
 1. **Create local env file**

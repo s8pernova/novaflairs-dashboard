@@ -11,7 +11,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = Path(__file__).resolve().parent.parent
 BACKEND_DIR = BASE_DIR / "backend"
 LOGS_DIR = BASE_DIR / "logs"
-SQL_DIR = BACKEND_DIR / "sql"
 
 CURRENT_YEAR = datetime.now().year
 
