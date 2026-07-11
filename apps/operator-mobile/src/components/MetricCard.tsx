@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import { colors, radii, spacing, typography } from "@/theme/tokens";
+
 interface MetricCardProps {
     accent: string;
     label: string;
@@ -30,29 +32,29 @@ const styles = StyleSheet.create({
         minHeight: 86,
         flexDirection: "row",
         overflow: "hidden",
-        borderRadius: 6,
+        borderRadius: radii.md,
         borderWidth: 1,
-        backgroundColor: "#192128",
+        backgroundColor: colors.surfaceRaised,
     },
     copy: {
         flex: 1,
-        paddingHorizontal: 14,
-        paddingVertical: 11,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.md,
     },
     label: {
-        color: "#8f9ca6",
-        fontSize: 11,
+        color: colors.riskUnknown,
+        fontSize: typography.bodySmall,
         fontWeight: "600",
     },
     value: {
-        marginTop: 3,
-        color: "#f4f6f8",
-        fontSize: 22,
+        marginTop: spacing.xs,
+        color: colors.textPrimary,
+        fontSize: typography.metric,
         fontWeight: "700",
     },
     detail: {
-        marginTop: 2,
-        color: "#687681",
-        fontSize: 10,
+        marginTop: spacing.xs,
+        color: colors.textSubtle,
+        fontSize: typography.caption,
     },
 });

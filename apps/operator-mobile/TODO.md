@@ -18,7 +18,7 @@ The first prototype targets the Android tablet workflow. Authentication,
 offline-first storage, background processing, push notifications, iOS release,
 and app-store submission are deliberately deferred.
 
-## 0. Baseline already complete
+## 0. Baseline
 
 - [x] Create the Expo SDK 56 TypeScript app inside the monorepo.
 - [x] Run Metro in WSL and connect it to the Windows Android emulator through
@@ -36,24 +36,31 @@ and app-store submission are deliberately deferred.
 - [x] Move the dashboard screen from `App.tsx` to
       `src/screens/OperatorDashboardScreen.tsx`; keep `App.tsx` as the thin app
       entrypoint.
-- [ ] Add `src/theme/tokens.ts` for shared colors, spacing, typography, borders,
+- [x] Add `src/theme/tokens.ts` for shared colors, spacing, typography, borders,
       and risk-level colors.
-- [ ] Update `MetricCard` and `TelemetryPlot` to consume theme tokens rather
+- [x] Update `MetricCard` and `TelemetryPlot` to consume theme tokens rather
       than repeating color literals.
-- [ ] Add `react-native-safe-area-context` and keep all controls clear of system
+- [x] Add `react-native-safe-area-context` and keep all controls clear of system
       bars and display cutouts.
-- [ ] Add package scripts for `typecheck`, `lint`, and `test`.
-- [ ] Add ESLint and the Expo-compatible Jest setup. Commit every resulting
-      package and lockfile change.
-- [ ] Keep `StyleSheet` as the styling system for this prototype. Reconsider
+- [x] Add package scripts for `typecheck`, `lint`, and `test`.
+- [x] Pin the app to its supported Node 22 runtime with `.nvmrc` and the package
+      engine declaration.
+- [x] Add ESLint and the Expo-compatible Jest setup, keeping package and lockfile
+      changes together.
+- [x] Keep `StyleSheet` as the styling system for this prototype. Reconsider
       NativeWind only after the native layout and component patterns are
       understood.
 
 Verification:
 
-- [ ] `npm run typecheck` passes.
-- [ ] `npm run lint` passes.
-- [ ] The mock dashboard still renders correctly in the tablet emulator.
+- [x] `npm run typecheck` passes.
+- [x] `npm run lint` passes.
+- [x] The mock dashboard still renders correctly in the tablet emulator.
+
+Known toolchain advisory (2026-07-11): `npm audit` reports a moderate `uuid`
+advisory through Expo's `@expo/config-plugins -> xcode` build-tool chain. npm's
+forced fix would downgrade Expo to SDK 46, so do not apply it. Recheck the
+advisory when upgrading Expo rather than breaking SDK compatibility.
 
 ## 2. Define the real read contract
 
@@ -286,10 +293,3 @@ Reference:
 - iOS build and device-specific polish
 - App-store signing, privacy declarations, and release automation
 - Production observability, crash reporting, and incident runbooks
-
-## Next task
-
-Begin with Phase 1: extract `OperatorDashboardScreen`, add theme tokens, and add
-the quality scripts before connecting real data. That teaches the React Native
-project structure while the existing mock dashboard remains available as a
-fast visual feedback loop.

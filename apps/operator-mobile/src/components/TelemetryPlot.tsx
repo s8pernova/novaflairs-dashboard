@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import type { TelemetryObservation } from "@/domain/telemetry";
+import { colors, radii, spacing, typography } from "@/theme/tokens";
 
 interface TelemetryPlotProps {
     observations: TelemetryObservation[];
@@ -13,10 +14,10 @@ interface PlotPoint {
 }
 
 function getRiskColor(probability: number | null): string {
-    if (probability === null) return "#8f9ca6";
-    if (probability >= 0.45) return "#f05d4f";
-    if (probability >= 0.3) return "#f0b84b";
-    return "#69c779";
+    if (probability === null) return colors.riskUnknown;
+    if (probability >= 0.45) return colors.riskHigh;
+    if (probability >= 0.3) return colors.riskElevated;
+    return colors.riskLow;
 }
 
 function makePlotPoints(observations: TelemetryObservation[]): PlotPoint[] {
@@ -59,9 +60,12 @@ export function TelemetryPlot({ observations }: TelemetryPlotProps) {
                     </Text>
                 </View>
                 <View style={styles.legend}>
-                    <LegendItem color="#69c779" label="Low" />
-                    <LegendItem color="#f0b84b" label="Elevated" />
-                    <LegendItem color="#f05d4f" label="High" />
+                    <LegendItem color={colors.riskLow} label="Low" />
+                    <LegendItem
+                        color={colors.riskElevated}
+                        label="Elevated"
+                    />
+                    <LegendItem color={colors.riskHigh} label="High" />
                 </View>
             </View>
 
@@ -125,38 +129,38 @@ const styles = StyleSheet.create({
         minWidth: 420,
         minHeight: 374,
         overflow: "hidden",
-        borderRadius: 6,
+        borderRadius: radii.md,
         borderWidth: 1,
-        borderColor: "#29323a",
-        backgroundColor: "#151d23",
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
     },
     panelHeader: {
         minHeight: 62,
-        paddingHorizontal: 18,
+        paddingHorizontal: spacing.lg,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
         borderBottomWidth: 1,
-        borderBottomColor: "#29323a",
+        borderBottomColor: colors.border,
     },
     title: {
-        color: "#f4f6f8",
-        fontSize: 16,
+        color: colors.textPrimary,
+        fontSize: typography.panelTitle,
         fontWeight: "700",
     },
     subtitle: {
-        marginTop: 2,
-        color: "#71808d",
-        fontSize: 10,
+        marginTop: spacing.xs,
+        color: colors.textMuted,
+        fontSize: typography.caption,
     },
     legend: {
         flexDirection: "row",
-        gap: 12,
+        gap: spacing.md,
     },
     legendItem: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 5,
+        gap: spacing.xs,
     },
     legendDot: {
         width: 7,
@@ -164,22 +168,22 @@ const styles = StyleSheet.create({
         borderRadius: 4,
     },
     legendText: {
-        color: "#8f9ca6",
-        fontSize: 10,
+        color: colors.riskUnknown,
+        fontSize: typography.caption,
     },
     plot: {
         flex: 1,
         minHeight: 270,
-        margin: 14,
+        margin: spacing.lg,
         overflow: "hidden",
-        borderRadius: 4,
+        borderRadius: radii.sm,
         borderWidth: 1,
-        borderColor: "#31404a",
-        backgroundColor: "#1b2a30",
+        borderColor: colors.mapBorder,
+        backgroundColor: colors.plot,
     },
     gridLine: {
         position: "absolute",
-        backgroundColor: "#2b4148",
+        backgroundColor: colors.grid,
     },
     horizontalOne: {
         top: "33%",
@@ -211,9 +215,9 @@ const styles = StyleSheet.create({
         height: 16,
         marginLeft: -8,
         marginTop: -8,
-        borderRadius: 8,
+        borderRadius: radii.full,
         borderWidth: 2,
-        borderColor: "#f4f6f8",
+        borderColor: colors.textPrimary,
     },
     emptyState: {
         flex: 1,
@@ -221,25 +225,25 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     emptyText: {
-        color: "#71808d",
-        fontSize: 13,
+        color: colors.textMuted,
+        fontSize: typography.body,
     },
     footer: {
         minHeight: 38,
-        paddingHorizontal: 18,
+        paddingHorizontal: spacing.lg,
         flexDirection: "row",
         alignItems: "center",
-        gap: 16,
+        gap: spacing.lg,
         borderTopWidth: 1,
-        borderTopColor: "#29323a",
+        borderTopColor: colors.border,
     },
     footerLabel: {
-        color: "#52a8e8",
-        fontSize: 12,
+        color: colors.info,
+        fontSize: typography.bodySmall,
         fontWeight: "800",
     },
     footerText: {
-        color: "#71808d",
-        fontSize: 10,
+        color: colors.textMuted,
+        fontSize: typography.caption,
     },
 });
