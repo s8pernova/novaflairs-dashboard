@@ -14,7 +14,8 @@
   },
   "scripts": {
     "start": "expo start",
-    "android": "ADB_SERVER_SOCKET=tcp:127.0.0.1:5037 ANDROID_HOME=/usr/lib/android-sdk ANDROID_SDK_ROOT=/usr/lib/android-sdk expo start --android",
+    "android:bridge": "ADB_SERVER_SOCKET=tcp:127.0.0.1:5037 /usr/lib/android-sdk/platform-tools/adb wait-for-device && ADB_SERVER_SOCKET=tcp:127.0.0.1:5037 /usr/lib/android-sdk/platform-tools/adb reverse tcp:8081 tcp:8081",
+    "android": "npm run android:bridge && ADB_SERVER_SOCKET=tcp:127.0.0.1:5037 ANDROID_HOME=/usr/lib/android-sdk ANDROID_SDK_ROOT=/usr/lib/android-sdk expo start --android --localhost",
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
