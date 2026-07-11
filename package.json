@@ -1,6 +1,9 @@
 {
   "name": "novaflair-dashboard",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "supabase": "supabase",
     "db:start": "supabase start",

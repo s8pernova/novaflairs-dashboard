@@ -2,26 +2,34 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Implementation
 
-State: Planned
+State: Repository implementation complete; local replay and linked deployment pending
 
-Evidence required before this ADR is marked Accepted:
+Evidence:
 
-- [ ] `supabase/config.toml` defines the repository's local Supabase project.
-- [ ] `supabase/migrations/` contains a reviewed, timestamped history that can
-      recreate the NOVAflair application schema from an empty local database.
-- [ ] The linked Supabase project's live schema and migration history have been
-      inspected and reconciled without replaying existing DDL against production.
-- [ ] Required operational reference data and disposable development fixtures
+- [x] `supabase/config.toml` defines the repository's local Supabase project.
+- [x] `supabase/migrations/` contains a reviewed baseline and two timestamped
+      forward migrations representing the verified Cloud schema and intended
+      security/data changes.
+- [x] Read-only linked inspection confirmed PostgreSQL 17.6, six application
+      tables, and empty remote migration history without changing Cloud state.
+- [x] Required operational reference data and disposable development fixtures
       have been classified and separated.
-- [ ] Every real consumer of `backend/sql/` has been traced, updated, or removed.
-- [ ] The replaced `backend/sql/` tree and its duplicate table mirrors have been
+- [x] Every real consumer of `backend/sql/` has been traced, updated, or removed.
+- [x] The replaced `backend/sql/` tree and its duplicate table mirrors have been
       deleted.
-- [ ] Local reset, migration-history, application, and security checks pass.
-- [ ] No production migration has been executed without explicit approval.
+- [x] The Supabase CLI is pinned locally, the layout gate passes, CI enforces the
+      gate, linked schema lint passes, and the UI lint/build passes.
+- [ ] A disposable local reset and role verification must still exercise every
+      migration before linked deployment.
+- [ ] The baseline version must be recorded as applied before the two forward
+      migrations are pushed to Cloud.
+- [x] No production migration or migration-history repair has been executed.
+
+Last checked: 2026-07-11
 
 ## Date
 
@@ -33,8 +41,8 @@ Aidan Hoo
 
 ## Context
 
-NOVAflair already uses Supabase Cloud as its PostgreSQL platform, but the
-repository does not use Supabase as its migration manager. Database SQL is split
+NOVAflair already used Supabase Cloud as its PostgreSQL platform, but the
+repository did not use Supabase as its migration manager. Database SQL was split
 across a custom `backend/sql/` tree:
 
 - `backend/sql/migrations/001_init_tables.sql` creates the six current
@@ -46,9 +54,9 @@ across a custom `backend/sql/` tree:
   migration history; and
 - `backend/sql/queries/` contains loose SQL that may overlap runtime queries.
 
-No repository-managed runner records those numbered files in Supabase migration
-history or proves that they can recreate the live database. The table mirrors
-also create a second representation that can drift from both the migrations and
+No repository-managed runner recorded those numbered files in Supabase migration
+history or proved that they could recreate the live database. The table mirrors
+also created a second representation that could drift from both the migrations and
 the live schema.
 
 The database has several distinct consumers:
@@ -71,8 +79,8 @@ Constraints:
 - Existing Node-RED ingestion and prediction processing must continue to work.
 - Data API access must be explicit; database objects are not public merely
   because the UI or mobile app needs them.
-- Supabase Cloud may already contain schema objects that are absent from its
-  recorded migration history.
+- Supabase Cloud contains the application schema while its recorded migration
+  history is empty, so the baseline cannot be executed against existing Cloud.
 - Database changes must remain reviewable and reproducible without relying on
   a developer's global CLI installation or local Docker volumes.
 - This refactor does not authorize applying or repairing production migrations.
@@ -82,8 +90,8 @@ Assumptions:
 - Supabase Cloud remains the durable hosted database for NOVAflair.
 - Local Supabase is disposable and exists to validate migrations and security
   behavior before an explicitly authorized deployment.
-- The linked project's actual schema and migration history will be inspected
-  before choosing the baseline-reconciliation procedure.
+- Read-only linked inspection is the evidence for the baseline and the pending
+  migration-history reconciliation procedure.
 
 ## Decision
 
@@ -157,22 +165,20 @@ Out of scope:
 
 - `supabase/config.toml`: local CLI and seed configuration.
 - `supabase/migrations/`: timestamped executable history.
-- `supabase/seed.sql` or ordered files configured by `config.toml`: disposable
-  local fixtures only.
+- `supabase/seeds/*.sql`: ordered, disposable local fixtures only.
 - `supabase/queries/read/`: read-only diagnostics, if retained.
 - `supabase/queries/verify/`: transactional role and contract verification that
   makes no persistent changes, if retained.
 - `supabase/queries/ops/`: explicitly invoked operational mutations, only when
   a real operator workflow exists and is documented.
 
-The existing `002_seed_scenario.sql` and `003_seed_model_runs.sql` are not moved
-mechanically. Each inserted row must first be classified:
+The former `002_seed_scenario.sql` and `003_seed_model_runs.sql` were not moved
+mechanically. Their rows were classified by runtime purpose:
 
-- If Node-RED or another deployed runtime requires the row to operate, it is
-  environment configuration/reference data and belongs in reviewed, idempotent
-  migration DML.
-- If the row exists only to make local demonstrations convenient, it belongs in
-  disposable seed data.
+- The Method 2 model row is required operational configuration and is created by
+  reviewed, idempotent migration DML.
+- The Brushfire Westline scenario and segment exist for the local generator and
+  live in disposable seed data.
 - Production identities, secrets, copied telemetry, and other environment data
   never belong in committed seeds.
 
@@ -235,24 +241,25 @@ Negative:
 
 - Establishing the first trustworthy baseline requires careful comparison with
   the live Cloud project.
-- Existing seed files may need to be split according to operational purpose.
+- Baseline repair and forward migration deployment remain separate reviewed
+  operations after the repository change is merged.
 - Local reset testing requires Docker and the Supabase local stack.
 - Security-sensitive SQL still needs manual review; migration tooling does not
   make grants or RLS correct automatically.
 
 Follow-ups:
 
-- [ ] Inspect the linked Cloud schema and migration history read-only.
-- [ ] Pin the Supabase CLI version in repository tooling.
+- [x] Inspect the linked Cloud schema and migration history read-only.
+- [x] Pin the Supabase CLI version in repository tooling.
 - [ ] Create and verify the initial baseline locally.
-- [ ] Classify scenario and model-run data as required reference data or local
+- [x] Classify scenario and model-run data as required reference data or local
       fixtures.
-- [ ] Trace and remove duplicate `backend/sql/tables/` definitions.
-- [ ] Determine whether `fetch_unprocessed_observations.sql` has a real consumer
+- [x] Trace and remove duplicate `backend/sql/tables/` definitions.
+- [x] Determine whether `fetch_unprocessed_observations.sql` has a real consumer
       beyond the equivalent query embedded in Node-RED.
 - [ ] Recreate the operator observation-feed change as a timestamped Supabase
       migration after the baseline.
-- [ ] Add automated migration-layout and clean-reset checks.
+- [x] Add and enforce the automated migration-layout check in CI.
 - [ ] Decide whether CI should run disposable Supabase reset tests after local
       verification is reliable.
 
@@ -276,20 +283,14 @@ Follow-ups:
 
 ## Rollout plan
 
-1. Keep the mobile database work stashed while this refactor establishes the
-   new migration paths.
-2. Inspect the linked project read-only and choose the baseline procedure from
-   evidence.
-3. Add and verify the native Supabase configuration and baseline locally.
-4. Classify and migrate required data, retained verification SQL, and all real
-   consumers of the custom paths.
-5. Delete `backend/sql/` after repository-wide reference checks pass.
-6. Commit the complete transition atomically on `refactor/supabase-iac`.
-7. Integrate that commit into `dev`, then merge the updated `dev` into
+1. Keep the mobile database work stashed while the shared migration foundation
+   is integrated.
+2. Merge `refactor/supabase-iac` into `dev`, then merge the updated `dev` into
    `feature/mobile-app` without rewriting the published mobile history.
-8. Port the stashed operator-feed work into a newly generated Supabase migration
+3. Port the stashed operator-feed work into a newly generated Supabase migration
    and verify it separately.
-9. Request separate approval before changing linked migration history or applying
+4. Verify the full migration history in disposable local Supabase.
+5. Request separate approval before changing linked migration history or applying
    any production migration.
 
 ## References

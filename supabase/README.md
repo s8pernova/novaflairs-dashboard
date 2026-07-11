@@ -23,6 +23,7 @@ The CLI is pinned as a repository-local npm dev dependency. Install it from the
 repository root:
 
 ```bash
+nvm use
 npm install
 npx supabase --version
 ```
