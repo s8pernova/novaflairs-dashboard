@@ -15,7 +15,7 @@ Aidan Hoo
 ## Context
 
 NOVAflair runs several runtimes from one repository: the browser-facing React UI,
-backend configuration and SQL, Node-RED automation, Docker Compose
+backend configuration, Supabase database tooling, Node-RED automation, Docker Compose
 orchestration, and hosted Supabase resources. Each runtime needs environment
 configuration, but not every value has the same exposure risk.
 
@@ -36,8 +36,8 @@ Assumptions:
 
 - The repo will commit example environment files with placeholder values.
 - Local `.env` files contain developer or deployment-specific secrets.
-- Hosted Supabase project secrets are managed outside this repository unless a
-  local Supabase CLI stack is added later.
+- Hosted Supabase project secrets and CLI authentication profiles are managed
+  outside this repository. Local Supabase uses only documented optional values.
 
 ## Decision
 
@@ -59,8 +59,8 @@ Decision details:
   the repo.
 - Wrap Docker Compose env values containing `$` in single quotes, especially
   bcrypt hashes and some generated database passwords.
-- Add `supabase/.env.example` only if the repo starts running a local Supabase
-  CLI stack.
+- Commit `supabase/.env.example` for optional local-only Supabase values; never
+  put linked-project credentials in that file.
 
 In scope:
 
@@ -113,6 +113,8 @@ Environment file policy:
 | `backend/.env`          | No      | Local backend secrets, including Supabase service-role access    |
 | `nodered/.env.example`  | Yes     | Node-RED runtime and database settings                           |
 | `nodered/.env`          | No      | Local Node-RED secrets                                           |
+| `supabase/.env.example` | Yes     | Optional local Supabase tooling values                           |
+| `supabase/.env.local`   | No      | Local Supabase tooling secrets, if ever required                 |
 
 ### Security and privacy
 
@@ -123,6 +125,9 @@ Environment file policy:
 - Node-RED must receive only the secrets required for its own runtime.
 - Hosted Supabase secrets belong in Supabase, GitHub, or host-level secret
   storage.
+- Supabase CLI access tokens and linked-project database passwords remain in
+  the developer's CLI profile or deployment secret store, never repository env
+  files.
 - Before making the repo public, rotate every credential that has ever been
   committed, remove leaked secret files from git history, and run a secret
   scanner such as `gitleaks` against the full history.
@@ -161,8 +166,7 @@ Follow-ups:
       public.
 - [ ] Remove leaked secret files from git history before making the repo public.
 - [ ] Run `gitleaks` or an equivalent secret scanner against the full history.
-- [ ] Add `supabase/.env.example` only if a local Supabase CLI stack is
-      introduced.
+- [x] Add `supabase/.env.example` when introducing the local Supabase CLI stack.
 
 ## Alternatives considered
 
@@ -178,9 +182,9 @@ Follow-ups:
    - Why not: runtime state belongs in the Docker volume; the repo should keep
      deterministic seed files only.
 
-4. Add Supabase local env examples now
-   - Why not: the repo does not currently run a local Supabase CLI stack, so that
-     file would document a runtime boundary that does not exist yet.
+4. Put linked-project credentials in `supabase/.env.local`
+   - Why not: CLI authentication profiles and deployment secret stores already
+     provide a safer boundary outside the repository.
 
 ## Rollout plan
 
@@ -189,5 +193,4 @@ Follow-ups:
 3. Use the ADR environment file table when adding or moving runtime config.
 4. Before public release, rotate any exposed credentials, remove leaked files
    from history, and scan the full history for secrets.
-5. Revisit this ADR if the repo adds a local Supabase stack or a new runtime
-   with its own secret boundary.
+5. Revisit this ADR when a new runtime introduces a distinct secret boundary.

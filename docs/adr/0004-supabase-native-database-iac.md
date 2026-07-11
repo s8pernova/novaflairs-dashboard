@@ -143,9 +143,6 @@ Out of scope:
   untracked convention around hand-numbered files.
 - One executable history removes ambiguity between migrations, table mirrors,
   and the live Cloud schema.
-- A migration-only model is proportionate to NOVAflair's current six-table
-  schema and avoids copying CoScholar's larger declarative-schema workflow
-  without a project-specific need.
 - Explicit separation between migrations, required reference data, disposable
   seeds, manual verification SQL, and runtime queries prevents accidental
   production data changes.
@@ -182,22 +179,6 @@ mechanically. Each inserted row must first be classified:
 The pending operator-feed SQL must be recreated through the Supabase migration
 workflow after the baseline is established. Its verification query belongs under
 `supabase/queries/verify/`, not in migration history.
-
-### Baseline reconciliation
-
-The implementation must not assume NOVAflair has the same remote-history state
-that CoScholar had. Before creating or recording a baseline:
-
-1. Inspect the linked project's migration list and live schema.
-2. Compare the live objects with the behavior represented by the existing
-   numbered SQL files, table mirrors, grants, and RLS policies.
-3. Generate and review a baseline that recreates the verified current state in
-   disposable local Supabase.
-4. If the live schema exists without matching migration history, propose the
-   exact history-repair operation separately, with a backup and explicit
-   approval. Do not execute the baseline against an already-populated schema.
-5. Verify local and linked histories again before any forward migration is
-   considered deployable.
 
 ### Change workflow
 
@@ -285,17 +266,11 @@ Follow-ups:
    - Rejected because two executable histories make the authoritative deployment
      path ambiguous and leave the refactor incomplete.
 
-3. Copy CoScholar's complete database-IaC layout unchanged
-   - Rejected because CoScholar's 59-table, multi-schema production baseline and
-     declarative-schema workflow solve a larger problem than NOVAflair currently
-     has. NOVAflair should adopt the shared migration discipline without copying
-     project-specific artifacts or repair history.
-
-4. Replay the existing numbered SQL files directly against Cloud
+3. Replay the existing numbered SQL files directly against Cloud
    - Rejected because the live schema and recorded migration history have not yet
      been reconciled; replaying DDL could fail or damage existing state.
 
-5. Make normal schema changes through the Supabase Dashboard
+4. Make normal schema changes through the Supabase Dashboard
    - Rejected because direct changes bypass repository review and reproducible
      migration history.
 

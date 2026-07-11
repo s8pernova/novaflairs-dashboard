@@ -1,0 +1,19 @@
+{
+  "name": "novaflair-dashboard",
+  "private": true,
+  "scripts": {
+    "supabase": "supabase",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status",
+    "db:reset": "supabase db reset",
+    "db:migration:new": "supabase migration new",
+    "db:migrations:local": "supabase migration list --local",
+    "db:migrations:linked": "supabase migration list --linked",
+    "db:lint": "supabase db lint --local",
+    "db:check-layout": "python scripts/check_supabase_layout.py"
+  },
+  "devDependencies": {
+    "supabase": "2.109.1"
+  }
+}
