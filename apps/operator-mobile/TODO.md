@@ -68,7 +68,7 @@ The current database stores measurements in `telemetry_observations` and model
 outputs in `prediction_results`. Crossing probability is not a column on
 `telemetry_observations`, so the app needs one intentional joined read model.
 
-- [ ] Define an `operator_observation_feed` database view containing only the
+- [x] Define an `operator_observation_feed` database view containing only the
       fields the app needs:
   - observation and scenario identifiers;
   - `observed_at`, `lat`, and `lon`;
@@ -77,29 +77,40 @@ outputs in `prediction_results`. Crossing probability is not a column on
   - quality score;
   - latest crossing probability, risk level, crossing decision, and prediction
     timestamp.
-- [ ] Make the view `security_invoker = true` so underlying Row Level Security
+- [x] Make the view `security_invoker = true` so underlying Row Level Security
       remains authoritative.
-- [ ] Add read grants and SELECT policies for every underlying table the view
+- [x] Add read grants and SELECT policies for every underlying table the view
       reads. The existing migration only grants reads on
       `telemetry_observations`; `prediction_results` still needs an explicit
       decision.
-- [ ] Expose the view to the Supabase Data API and grant only `SELECT` to the
+- [x] Expose the view to the Supabase Data API and grant only `SELECT` to the
       intended `anon` and/or `authenticated` role.
-- [ ] Add the schema change through the repository's migration process. Review
+- [x] Add the schema change through the repository's migration process. Review
       the migration before running it; do not change the production database by
       hand.
 - [ ] Test the view with the same role the mobile client will use and verify
       that it returns one latest prediction per observation.
-- [ ] Decide the prototype's scenario rule. Start with scenario `1` only if the
+- [x] Decide the prototype's scenario rule. Start with scenario `1` only if the
       seeded `Brushfire Westline 01` remains the intended demo; otherwise pass a
       selected scenario ID into the repository.
+
+Contract decision: the view contains every scenario and the mobile repository
+must receive an explicit scenario ID. The first prototype may pass seeded
+scenario `1` at the screen boundary, but neither the view nor repository will
+hide that choice as an internal default. Observation identifiers, scenario ID,
+drone ID, timestamp, wind speed, flame length, and burn time are required.
+Firebreak ID, coordinates, altitude, quality, and every prediction field are
+nullable; prediction fields are null together until a model result exists.
 
 Verification:
 
 - [ ] An anonymous or authenticated client query returns the expected rows.
 - [ ] A client key cannot insert, update, or delete telemetry or predictions.
-- [ ] The view's column names and nullability are recorded before mobile code is
+- [x] The view's column names and nullability are recorded before mobile code is
       updated.
+
+Migration `005_operator_observation_feed.sql` is prepared but intentionally not
+applied. The remaining runtime verification boxes require applying it first.
 
 ## 3. Connect the mobile app to Supabase
 
