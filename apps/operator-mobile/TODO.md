@@ -116,15 +116,16 @@ the feed returns zero duplicate observations.
 
 ## 3. Connect the mobile app to Supabase
 
-- [ ] Install `@supabase/supabase-js` with `npx expo install` and commit the
-      updated lockfile.
-- [ ] Copy `.env.example` to `.env.local` and fill in
+- [x] Install pinned `@supabase/supabase-js` and
+      `react-native-url-polyfill` versions with `npx expo install` and update
+      the lockfile.
+- [x] Copy `.env.example` to the ignored `.env` file and fill in
       `EXPO_PUBLIC_SUPABASE_URL` and
       `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
-- [ ] Confirm `.env.local` remains ignored. Never place a service-role key or
+- [x] Confirm `.env` remains ignored. Never place a service-role key or
       database password in the mobile project.
-- [ ] Add `src/data/supabaseClient.ts` with explicit missing-environment errors.
-- [ ] Because this prototype has no login, configure the client without
+- [x] Add `src/data/supabaseClient.ts` with explicit missing-environment errors.
+- [x] Because this prototype has no login, configure the client without
       persistent auth-session storage. Add session storage only when auth is a
       real feature.
 - [ ] Add a raw database-row type for `operator_observation_feed`.

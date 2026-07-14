@@ -6,11 +6,13 @@
     "node": ">=22.13.0"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.110.3",
     "expo": "~56.0.15",
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
     "react-native": "0.85.3",
-    "react-native-safe-area-context": "~5.7.0"
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-url-polyfill": "3.0.0"
   },
   "devDependencies": {
     "@testing-library/react-native": "^14.0.1",
@@ -24,7 +26,7 @@
   },
   "scripts": {
     "start": "expo start",
-    "android:bridge": "ADB_SERVER_SOCKET=tcp:127.0.0.1:5037 /usr/lib/android-sdk/platform-tools/adb wait-for-device && ADB_SERVER_SOCKET=tcp:127.0.0.1:5037 /usr/lib/android-sdk/platform-tools/adb reverse tcp:8081 tcp:8081",
+    "android:bridge": "bash ./scripts/android-bridge.sh",
     "android": "npm run android:bridge && ADB_SERVER_SOCKET=tcp:127.0.0.1:5037 ANDROID_HOME=/usr/lib/android-sdk ANDROID_SDK_ROOT=/usr/lib/android-sdk expo start --android --localhost",
     "ios": "expo start --ios",
     "web": "expo start --web",
