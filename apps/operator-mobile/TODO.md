@@ -176,31 +176,33 @@ Verification:
 
 ## 5. Replace the temporary plot with a native map
 
-Use `react-native-maps` for this prototype. Expo SDK 56 includes it in Expo Go,
-while `expo-maps` is currently alpha and requires a development build.
+Use `react-native-maps` for this prototype. On Android it uses Google Maps and,
+as of the current Expo Go release, requires a development build with the app's
+own Google Maps key to render the base map. `expo-maps` remains alpha.
 
-- [ ] Install `react-native-maps` with:
+- [x] Install `react-native-maps` with:
 
   ```bash
   npx expo install react-native-maps
   ```
 
-- [ ] Replace `TelemetryPlot` with an `ObservationMap` built around `MapView`.
-- [ ] Fit the initial camera to the returned observation coordinates instead of
+- [x] Replace `TelemetryPlot` with an `ObservationMap` built around `MapView`.
+- [x] Fit the initial camera to the returned observation coordinates instead of
       hard-coding a city-scale viewport.
-- [ ] Render one marker per positioned observation.
-- [ ] Color markers from the shared risk-level tokens.
-- [ ] Scale markers conservatively from flame length without obscuring nearby
+- [x] Render one marker per positioned observation.
+- [x] Color markers from the shared risk-level tokens.
+- [x] Scale markers conservatively from flame length without obscuring nearby
       points.
-- [ ] Draw wind direction as short polylines or arrows from each observation.
-- [ ] Connect marker presses to the selected-observation detail panel.
-- [ ] Keep the no-position state working when rows have null coordinates.
+- [x] Draw wind direction as short polylines or arrows from each observation.
+- [x] Connect marker presses to the selected-observation detail panel.
+- [x] Keep the no-position state working when rows have null coordinates.
 - [ ] Configure and restrict a Google Maps API key before creating a standalone
       Android build. Do not expose an unrestricted general-purpose key.
 
 Verification:
 
-- [ ] The map renders in Expo Go on the Android emulator.
+- [ ] The map renders in an Android development build on the Galaxy Tab A9
+      emulator.
 - [ ] Markers appear at the same coordinates returned by Supabase.
 - [ ] Panning, zooming, marker selection, and screen rotation constraints work.
 - [ ] The map remains usable when several observations overlap.
@@ -209,25 +211,26 @@ References:
 
 - [Expo SDK 56 react-native-maps documentation](https://docs.expo.dev/versions/v56.0.0/sdk/map-view/)
 - [Expo Maps status](https://docs.expo.dev/versions/v56.0.0/sdk/maps/)
+- [Upstream Expo Go blank-map report](https://github.com/react-native-maps/react-native-maps/issues/5888)
 
 ## 6. Make the feed update like an operational tool
 
-- [ ] Keep the manual Refresh action.
-- [ ] Add foreground polling at a modest interval, initially 5-10 seconds.
-- [ ] Pause polling when the app is not active.
-- [ ] Prevent overlapping requests when a previous refresh is still running.
-- [ ] Clean up timers when the screen unmounts.
-- [ ] Preserve the last successful observations during a refresh and show a
+- [x] Keep the manual Refresh action.
+- [x] Add foreground polling at a modest interval, initially 5-10 seconds.
+- [x] Pause polling when the app is not active.
+- [x] Prevent overlapping requests when a previous refresh is still running.
+- [x] Clean up timers when the screen unmounts.
+- [x] Preserve the last successful observations during a refresh and show a
       smaller refreshing indicator instead of blanking the whole map.
-- [ ] Record the last successful refresh time and mark the feed stale when
+- [x] Record the last successful refresh time and mark the feed stale when
       updates stop.
-- [ ] Treat Supabase Realtime as a post-prototype optimization unless polling
+- [x] Treat Supabase Realtime as a post-prototype optimization unless polling
       proves inadequate during the demo.
 
 Verification:
 
 - [ ] A new database observation appears without restarting the app.
-- [ ] Backgrounding and reopening the app does not create duplicate polling.
+- [x] Backgrounding and reopening the app does not create duplicate polling.
 - [ ] A temporary network failure preserves old data, reports stale status, and
       recovers automatically.
 

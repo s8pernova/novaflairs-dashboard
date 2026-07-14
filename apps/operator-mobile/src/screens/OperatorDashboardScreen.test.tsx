@@ -8,6 +8,26 @@ jest.mock("@/data/telemetryRepository", () => ({
     getTelemetryObservations: jest.fn(),
 }));
 
+jest.mock("@/components/ObservationMap", () => {
+    const React = jest.requireActual("react");
+    const { Pressable } = jest.requireActual("react-native");
+
+    return {
+        ObservationMap: ({ observations, onSelectObservation }: {
+            observations: TelemetryObservation[];
+            onSelectObservation: (observationId: number) => void;
+        }) => {
+            const observation = observations[0];
+            return React.createElement(Pressable, {
+                accessibilityLabel: `Observation ${observation.id}, ${Math.round(
+                    (observation.crossingProbability ?? 0) * 100,
+                )} percent crossing risk`,
+                onPress: () => onSelectObservation(observation.id),
+            });
+        },
+    };
+});
+
 const mockGetTelemetryObservations = jest.mocked(getTelemetryObservations);
 
 function makeObservation(
