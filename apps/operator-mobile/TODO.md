@@ -196,8 +196,12 @@ own Google Maps key to render the base map. `expo-maps` remains alpha.
 - [x] Draw wind direction as short polylines or arrows from each observation.
 - [x] Connect marker presses to the selected-observation detail panel.
 - [x] Keep the no-position state working when rows have null coordinates.
-- [ ] Configure and restrict a Google Maps API key before creating a standalone
+- [x] Configure and restrict a Google Maps API key before creating a standalone
       Android build. Do not expose an unrestricted general-purpose key.
+
+The Android key is restricted to `com.novaflair.operator` and the EAS-managed
+signing certificate. EAS stores the key as a sensitive, project-scoped build
+variable for the development, preview, and production environments.
 
 Verification:
 
@@ -257,10 +261,10 @@ Verification:
 
 - [ ] Unit-test `summarizeTelemetry()` for empty, single, multiple, and nullable
       observations.
-- [ ] Extract and unit-test risk-color and coordinate/wind-vector helpers.
+- [x] Extract and unit-test risk-color and coordinate/wind-vector helpers.
 - [ ] Unit-test the database-row-to-domain mapper, including null prediction and
       null coordinate cases.
-- [ ] Test repository success and Supabase error behavior with a mocked client.
+- [x] Test repository success and Supabase error behavior with a mocked client.
 - [ ] Test the dashboard's loading, empty, ready, stale, and error states.
 - [ ] Test marker selection and Retry/Refresh actions.
 - [ ] Keep one manual emulator smoke checklist for native map behavior that unit
@@ -268,9 +272,9 @@ Verification:
 
 Verification:
 
-- [ ] `npm test` passes from `apps/operator-mobile`.
-- [ ] `npm run typecheck` and `npm run lint` still pass.
-- [ ] `npx expo export --platform android` produces a bundle.
+- [x] `npm test` passes from `apps/operator-mobile`.
+- [x] `npm run typecheck` and `npm run lint` still pass.
+- [x] `npx expo export --platform android` produces a bundle.
 
 Reference:
 
@@ -278,11 +282,11 @@ Reference:
 
 ## 9. Produce a shareable Android preview
 
-- [ ] Give the app a stable Android package identifier in Expo config.
+- [x] Give the app a stable Android package identifier in Expo config.
 - [ ] Replace template icons and splash assets with NOVAflair assets.
-- [ ] Add the map provider's restricted Android key through build-time
+- [x] Add the map provider's restricted Android key through build-time
       configuration.
-- [ ] Configure EAS for an internal Android preview profile, or document an
+- [x] Configure EAS for an internal Android preview profile, or document an
       equivalent reproducible local APK build.
 - [ ] Build and install the preview APK on the target tablet or emulator.
 - [ ] Verify the preview build uses the intended Supabase project and contains
