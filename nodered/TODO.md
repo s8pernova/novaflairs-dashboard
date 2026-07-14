@@ -101,32 +101,32 @@ Verification:
       `Scenario Simulator` flow.
 - [x] Load the source-controlled scenario definition and simulation module in
       the container runtime.
-- [ ] Add Start, Pause, Resume, Reset, Step, and Trigger Wind Shift controls.
-- [ ] Keep one interval/tick source and ignore ticks unless a run is active.
-- [ ] Store only the active run state in Node-RED context; scenario definitions
+- [x] Add Start, Pause, Resume, Reset, Step, and Trigger Wind Shift controls.
+- [x] Keep one interval/tick source and ignore ticks unless a run is active.
+- [x] Store only the active run state in Node-RED context; scenario definitions
       and engine code remain source controlled.
-- [ ] Prevent a second Start action from creating overlapping active runs.
-- [ ] Format the engine's telemetry through one adapter before the PostgreSQL
+- [x] Prevent a second Start action from creating overlapping active runs.
+- [x] Format the engine's telemetry through one adapter before the PostgreSQL
       insert node.
-- [ ] Show the run ID, phase, tick, and status with Node-RED status/debug nodes.
-- [ ] Route validation, engine, and database failures to a visible error path.
+- [x] Show the run ID, phase, tick, and status with Node-RED status/debug nodes.
+- [x] Route validation, engine, and database failures to a visible error path.
 - [ ] Keep the Method 2 polling flow separate and label it clearly as the
       baseline prediction flow.
 
 Verification:
 
-- [ ] Start begins one run and emits one observation per configured tick.
-- [ ] Pause stops inserts without discarding state; Resume continues it.
-- [ ] Step advances exactly one tick while paused.
-- [ ] Reset returns to the initial deterministic state without stale timers.
-- [ ] Trigger Wind Shift uses the same event handling as the scripted event.
+- [x] Start begins one run and emits one observation per configured tick.
+- [x] Pause stops inserts without discarding state; Resume continues it.
+- [x] Step advances exactly one tick while paused.
+- [x] Reset returns to the initial deterministic state without stale timers.
+- [x] Trigger Wind Shift uses the same event handling as the scripted event.
 - [ ] Restarting Node-RED does not silently resume a half-finished run.
 
 ## 4. Record independent outcomes and preserve the baseline
 
-- [ ] Continue inserting simulator output into `telemetry_observations` with
+- [x] Continue inserting simulator output into `telemetry_observations` with
       `source_kind = 'simulated'`.
-- [ ] Continue running Method 2 as model version `v1`; do not describe the fixed
+- [x] Continue running Method 2 as model version `v1`; do not describe the fixed
       logistic equation as a trained AI model.
 - [ ] When a run resolves, insert its crossing or containment result into
       `observed_outcomes` using the observation where the outcome became known.
@@ -134,7 +134,7 @@ Verification:
       metadata has a reviewed first-class schema.
 - [ ] Make outcome insertion idempotent so replayed messages cannot create
       duplicate labels.
-- [ ] Verify that outcome generation cannot read Method 2 probability, risk, or
+- [x] Verify that outcome generation cannot read Method 2 probability, risk, or
       decision fields.
 - [ ] Decide through a reviewed migration whether first-class `scenario_runs`
       metadata and an outcome uniqueness constraint are required. Do not run a
@@ -150,9 +150,9 @@ Verification:
 
 ## 5. Connect the complete demo path
 
-- [ ] Start Node-RED with `docker compose up -d --build nodered`.
+- [x] Start Node-RED with `docker compose up -d --build nodered`.
 - [ ] Run one low-risk containment scenario from Reset to completion.
-- [ ] Run one wind-shift crossing scenario from Reset to completion.
+- [x] Run one wind-shift crossing scenario from Reset to completion.
 - [ ] Confirm the expected rows in `telemetry_observations`,
       `prediction_results`, and `observed_outcomes`.
 - [ ] Trace one observation ID through the prediction row and
@@ -173,7 +173,7 @@ Verification:
 
 - [ ] Export the deployed editor flow and intentionally replace the tracked
       `nodered/flows.json`.
-- [ ] Never copy `flows_cred.json`, session data, context state, or runtime
+- [x] Never copy `flows_cred.json`, session data, context state, or runtime
       backups into Git.
 - [ ] Review the exported JSON for credentials, generated IDs, disabled nodes,
       stale debug nodes, and accidental workspace changes.
