@@ -238,6 +238,12 @@ test*
 !scripts/tests/
 !scripts/tests/test_*.py
 !scripts/tests/**/test_*.py
+!nodered/test/
+!nodered/test/**
+
+# Node-RED source modules are application code, not Python build output.
+!nodered/lib/
+!nodered/lib/**
 
 # Browser session data (contains cookies and login sessions)
 __browser_data__/

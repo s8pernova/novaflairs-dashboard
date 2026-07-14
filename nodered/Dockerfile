@@ -9,6 +9,8 @@ COPY nodered/package.json nodered/package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 COPY nodered/flows.json nodered/settings.js ./
+COPY nodered/lib ./lib
+COPY nodered/scenarios ./scenarios
 COPY nodered/docker/entrypoint.sh /usr/local/bin/novaflairs-nodered-entrypoint
 
 RUN chmod +x /usr/local/bin/novaflairs-nodered-entrypoint \

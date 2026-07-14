@@ -19,6 +19,13 @@
  *  - Node Settings
  *
  **/
+const scenarioEngine = require("/opt/novaflairs-nodered/lib/scenario-engine");
+const brushfireWestline01 = require(
+    "/opt/novaflairs-nodered/scenarios/brushfire-westline-01.json",
+);
+
+scenarioEngine.validateScenario(brushfireWestline01);
+
 if (!process.env.NODE_RED_ADMIN_PASSWORD) {
     throw new Error("Missing NODE_RED_ADMIN_PASSWORD");
 }
@@ -546,7 +553,10 @@ module.exports = {
      *    global.get("os")
      */
     functionGlobalContext: {
-        // os:require('os'),
+        scenarioEngine,
+        scenarios: Object.freeze({
+            brushfireWestline01: Object.freeze(brushfireWestline01),
+        }),
     },
 
     /** The maximum number of messages nodes will buffer internally as part of their

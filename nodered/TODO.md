@@ -40,66 +40,66 @@ it does not describe a continuous fire or produce reproducible outcomes.
 
 ## 1. Define the simulator contract
 
-- [ ] Add a versioned scenario definition under `nodered/scenarios/` for
+- [x] Add a versioned scenario definition under `nodered/scenarios/` for
       `Brushfire Westline 01`.
-- [ ] Give the definition a stable scenario key, schema version, simulator
+- [x] Give the definition a stable scenario key, schema version, simulator
       version, seed, tick duration, and total duration.
-- [ ] Record the database scenario and firebreak-segment mapping explicitly;
+- [x] Record the database scenario and firebreak-segment mapping explicitly;
       do not hide numeric IDs inside a function node.
-- [ ] Define initial position, altitude, heading, spread rate, wind, flame
+- [x] Define initial position, altitude, heading, spread rate, wind, flame
       length, burn time, fuel factor, and telemetry quality.
-- [ ] Define named phases such as ignition, growth, firebreak approach, wind
+- [x] Define named phases such as ignition, growth, firebreak approach, wind
       shift, crossing or containment, and completion.
-- [ ] Define scripted events by simulation time and keep manual event triggers
+- [x] Define scripted events by simulation time and keep manual event triggers
       as explicit overrides of the same event contract.
-- [ ] Define run state containing the run ID, seed, tick index, elapsed time,
+- [x] Define run state containing the run ID, seed, tick index, elapsed time,
       phase, position, heading, current conditions, fired events, and outcome.
-- [ ] Document units and valid ranges for every generated telemetry field.
-- [ ] Validate a scenario definition at startup and fail with a useful error
+- [x] Document units and valid ranges for every generated telemetry field.
+- [x] Validate a scenario definition at startup and fail with a useful error
       before inserting data when it is invalid.
 
 Verification:
 
-- [ ] A scenario definition can be reviewed without opening the Node-RED
+- [x] A scenario definition can be reviewed without opening the Node-RED
       editor.
-- [ ] Missing required fields, invalid ranges, and unknown events are rejected.
-- [ ] The same definition and seed identify one reproducible run.
+- [x] Missing required fields, invalid ranges, and unknown events are rejected.
+- [x] The same definition and seed identify one reproducible run.
 
 ## 2. Build a deterministic, testable scenario engine
 
-- [ ] Add the simulation engine as a normal JavaScript module under
+- [x] Add the simulation engine as a normal JavaScript module under
       `nodered/lib/`; do not bury the authoritative calculations in a large
       function node.
-- [ ] Use a small seeded pseudo-random generator instead of `Math.random()`.
-- [ ] Implement an initializer that creates run state from a scenario
+- [x] Use a small seeded pseudo-random generator instead of `Math.random()`.
+- [x] Implement an initializer that creates run state from a scenario
       definition and seed.
-- [ ] Implement one pure tick operation that returns the next state and emitted
+- [x] Implement one pure tick operation that returns the next state and emitted
       telemetry without mutating its input.
-- [ ] Advance position from elapsed time, heading, spread rate, and wind.
-- [ ] Correlate flame length and burn time with the simulated conditions rather
+- [x] Advance position from elapsed time, heading, spread rate, and wind.
+- [x] Correlate flame length and burn time with the simulated conditions rather
       than sampling every field independently.
-- [ ] Apply bounded noise only after the coherent state has been calculated.
-- [ ] Apply scripted and manual events through one event function.
-- [ ] Determine crossing or containment from simulator state independently of
+- [x] Apply bounded noise only after the coherent state has been calculated.
+- [x] Apply scripted and manual events through one event function.
+- [x] Determine crossing or containment from simulator state independently of
       the Method 2 prediction formula.
-- [ ] Emit run ID, scenario key, simulator version, seed, tick, phase, and event
+- [x] Emit run ID, scenario key, simulator version, seed, tick, phase, and event
       metadata in `raw_payload_json`.
-- [ ] Add Node's built-in test runner and a package script for simulator tests.
+- [x] Add Node's built-in test runner and a package script for simulator tests.
 
 Verification:
 
-- [ ] Repeating a scenario with the same seed produces identical states,
+- [x] Repeating a scenario with the same seed produces identical states,
       telemetry, and outcome.
-- [ ] Different seeds vary bounded noise without changing scripted events.
-- [ ] Position advances continuously and remains within the scenario bounds.
-- [ ] Wind-shift and phase-transition tests prove expected state changes.
-- [ ] Outcome tests do not import or duplicate the Method 2 equation.
+- [x] Different seeds vary bounded noise without changing scripted events.
+- [x] Position advances continuously and remains within the scenario bounds.
+- [x] Wind-shift and phase-transition tests prove expected state changes.
+- [x] Outcome tests do not import or duplicate the Method 2 equation.
 
 ## 3. Orchestrate the engine in Node-RED
 
 - [ ] Replace the disabled `Run every 5s -> RNG` path with a dedicated
       `Scenario Simulator` flow.
-- [ ] Load the source-controlled scenario definition and simulation module in
+- [x] Load the source-controlled scenario definition and simulation module in
       the container runtime.
 - [ ] Add Start, Pause, Resume, Reset, Step, and Trigger Wind Shift controls.
 - [ ] Keep one interval/tick source and ignore ticks unless a run is active.
@@ -177,17 +177,17 @@ Verification:
       backups into Git.
 - [ ] Review the exported JSON for credentials, generated IDs, disabled nodes,
       stale debug nodes, and accidental workspace changes.
-- [ ] Ensure the Docker image copies scenario definitions and simulator modules
+- [x] Ensure the Docker image copies scenario definitions and simulator modules
       into the runtime seed directory.
 - [ ] Verify a fresh disposable Node-RED volume starts from tracked assets.
-- [ ] Update `nodered/README.md` with simulator controls, test commands, export
+- [x] Update `nodered/README.md` with simulator controls, test commands, export
       workflow, and the warning about persistent runtime state.
 
 Verification:
 
 - [ ] `git diff --check` passes.
-- [ ] Simulator tests pass outside Node-RED.
-- [ ] The Compose service starts with no flow errors.
+- [x] Simulator tests pass outside Node-RED.
+- [x] The Compose service starts with no flow errors.
 - [ ] A fresh volume reproduces the committed flow and scenario without manual
       editor repair.
 
@@ -240,4 +240,3 @@ Verification:
 - [ ] A model-service outage leaves telemetry and observed-outcome collection
       working.
 - [ ] The app can explain which model produced a displayed prediction.
-

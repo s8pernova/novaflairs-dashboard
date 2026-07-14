@@ -15,6 +15,10 @@ Evidence:
       predictions, and observed outcomes have been inspected.
 - [x] Method 2 has been classified as an explainable fixed-equation baseline,
       not a trained AI model.
+- [x] A versioned scenario contract and deterministic simulation engine have
+      been implemented with automated replay and outcome tests.
+- [x] The container validates and exposes the tracked simulator through
+      Node-RED global context without replacing persistent editor flows.
 - [ ] The independent-RNG generator has been replaced by a deterministic,
       stateful scenario simulator.
 - [ ] The simulator produces independently determined observed outcomes.
@@ -332,4 +336,3 @@ Follow-ups:
   `docs/adr/0003-keep-secrets-scoped-to-runtime.md`
 - ADR 0004, Use Supabase-Native Database Migrations:
   `docs/adr/0004-supabase-native-database-iac.md`
-
