@@ -85,7 +85,7 @@
       "type": "wind_shift",
       "atSeconds": 60,
       "changes": {
-        "windSpeedMps": 8,
+        "windSpeedMps": 10,
         "windDirectionDeg": 270,
         "headingDeg": 90,
         "spreadMultiplier": 2

@@ -62,9 +62,15 @@ npm test
 npx expo export --platform android
 ```
 
-Native map behavior still needs a manual emulator smoke test: verify map tiles,
-pan and zoom, marker selection, selection clearing, Refresh, and landscape
-layout.
+Unit tests cannot prove native map and emulator behavior. Before a demo build,
+complete this manual smoke checklist on `Galaxy_Tab_A9`:
+
+- [ ] The app opens directly in landscape without an Expo error screen.
+- [ ] Google map tiles render, and pan and zoom gestures remain responsive.
+- [ ] Map markers match the latest Supabase observation coordinates.
+- [ ] Selecting and clearing a marker updates the detail panel.
+- [ ] Refresh updates the timestamp without blanking the map.
+- [ ] A new Node-RED observation appears without restarting the app.
 
 ## Data boundary
 

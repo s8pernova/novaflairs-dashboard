@@ -74,5 +74,29 @@ nodes. Start, pause, resume, reset, step, and wind-shift controls are assembled
 in the editor, then the deployed flow is intentionally exported into the
 tracked `flows.json` for review.
 
-Follow `SCENARIO_FLOW_GUIDE.md` for the exact node configuration, Function-node
-adapters, wiring, and hands-on verification sequence.
+## Replay the operator demo
+
+Start the source-controlled runtime from the repository root:
+
+```bash
+docker compose up -d --build nodered
+```
+
+Open `http://localhost:1880`, select the `Scenario Simulator` tab, and use one
+of these two replay modes:
+
+1. Select **Reset** and let the five-second `Tick` inject run normally.
+2. For a faster controlled walkthrough, select **Reset**, immediately select
+   **Pause**, then select **Step** once per simulated five-second interval.
+
+The scripted wind shift fires at 60 simulated seconds. With the default seed,
+the Method 2 results cover moderate, transition, and high risk before the run
+resolves as crossed. The prediction flow polls every three seconds, and
+the mobile app polls every eight seconds, so allow both consumers one interval
+to display the final observation.
+
+**Reset** creates a new run ID and initial state. It does not delete observations
+from earlier runs, which keeps the telemetry history auditable. Run
+`supabase/queries/verify/trace_operator_demo_run.sql` in the Supabase SQL editor
+to trace every observation from the latest replay through its prediction and
+operator-feed row without changing data.

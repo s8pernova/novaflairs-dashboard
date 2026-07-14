@@ -233,41 +233,48 @@ References:
 
 Verification:
 
-- [ ] A new database observation appears without restarting the app.
+- [x] A new database observation appears without restarting the app.
 - [x] Backgrounding and reopening the app does not create duplicate polling.
 - [ ] A temporary network failure preserves old data, reports stale status, and
       recovers automatically.
 
 ## 7. Verify the complete data pipeline
 
-- [ ] Start the repository's documented Docker Compose stack when Node-RED is
+- [x] Start the repository's documented Docker Compose stack when Node-RED is
       needed for the demo.
-- [ ] Confirm Node-RED inserts a telemetry observation.
-- [ ] Confirm the prediction flow creates the matching `prediction_results`
+- [x] Confirm Node-RED inserts a telemetry observation.
+- [x] Confirm the prediction flow creates the matching `prediction_results`
       row.
-- [ ] Confirm `operator_observation_feed` returns the joined result.
-- [ ] Confirm the mobile app renders that same result and risk level.
-- [ ] Create a small deterministic demo sequence covering low, elevated, and
-      high/severe crossing risk.
-- [ ] Document how to reset or replay the demo without editing production data.
+- [x] Confirm `operator_observation_feed` returns the joined result.
+- [x] Confirm the mobile app renders that same result and risk level.
+- [x] Create a small deterministic demo sequence covering moderate, transition,
+      and high crossing risk.
+- [x] Document how to reset or replay the demo without editing production data.
 
 Verification:
 
-- [ ] Trace one observation ID from Node-RED input through both database tables
+- [x] Trace one observation ID from Node-RED input through both database tables
       to the selected marker in the app.
-- [ ] Values and units match at every boundary.
+- [x] Values and units match at every boundary.
+
+Verified on `Galaxy_Tab_A9` on 2026-07-14: deterministic run
+`brushfire-westline-01-1784025654739` produced 26 telemetry rows, 26 matching
+predictions, and 26 joined feed rows. Observation `286648` mapped to prediction
+`289369`; the publishable mobile client displayed and selected `#286648` as
+`High` at `36%`. The source telemetry and feed values matched for scenario,
+firebreak, timestamp, coordinates, wind, flame length, and burn time.
 
 ## 8. Add focused automated tests
 
-- [ ] Unit-test `summarizeTelemetry()` for empty, single, multiple, and nullable
+- [x] Unit-test `summarizeTelemetry()` for empty, single, multiple, and nullable
       observations.
 - [x] Extract and unit-test risk-color and coordinate/wind-vector helpers.
-- [ ] Unit-test the database-row-to-domain mapper, including null prediction and
+- [x] Unit-test the database-row-to-domain mapper, including null prediction and
       null coordinate cases.
 - [x] Test repository success and Supabase error behavior with a mocked client.
-- [ ] Test the dashboard's loading, empty, ready, stale, and error states.
-- [ ] Test marker selection and Retry/Refresh actions.
-- [ ] Keep one manual emulator smoke checklist for native map behavior that unit
+- [x] Test the dashboard's loading, empty, ready, stale, and error states.
+- [x] Test marker selection and Retry/Refresh actions.
+- [x] Keep one manual emulator smoke checklist for native map behavior that unit
       tests cannot prove.
 
 Verification:

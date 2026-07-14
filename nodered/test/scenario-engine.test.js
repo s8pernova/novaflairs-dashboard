@@ -103,7 +103,7 @@ test("applies the wind shift once through scripted or manual control", () => {
     const shifted = applyScenarioEvent(scenario, initial, "wind-shift");
     const repeated = applyScenarioEvent(scenario, shifted, "wind-shift");
 
-    assert.equal(shifted.windSpeedMps, 8);
+    assert.equal(shifted.windSpeedMps, 10);
     assert.equal(shifted.headingDeg, 90);
     assert.equal(shifted.spreadMultiplier, 2);
     assert.deepEqual(shifted.firedEventIds, ["wind-shift"]);

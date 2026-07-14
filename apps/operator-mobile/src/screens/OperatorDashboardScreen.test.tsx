@@ -62,6 +62,16 @@ describe("OperatorDashboardScreen", () => {
         jest.clearAllMocks();
     });
 
+    it("shows an explicit loading state while the first request is pending", async () => {
+        mockGetTelemetryObservations.mockImplementation(
+            () => new Promise(() => undefined),
+        );
+        const screen = await render(<OperatorDashboardScreen />);
+
+        expect(screen.getByLabelText("Data status: Loading")).toBeTruthy();
+        expect(screen.getByText("Loading telemetry...")).toBeTruthy();
+    });
+
     it("renders live observations and exposes selectable details", async () => {
         mockGetTelemetryObservations.mockResolvedValue([makeObservation()]);
         const screen = await render(<OperatorDashboardScreen />);
@@ -121,6 +131,32 @@ describe("OperatorDashboardScreen", () => {
         await waitFor(() => {
             expect(screen.getByLabelText("Data status: Live")).toBeTruthy();
         });
+    });
+
+    it("refreshes an already visible feed without returning to loading", async () => {
+        mockGetTelemetryObservations
+            .mockResolvedValueOnce([makeObservation()])
+            .mockResolvedValueOnce([
+                makeObservation({
+                    id: 286569,
+                    crossingProbability: 0.65,
+                    riskLevel: "severe",
+                    predictedCrossingDecision: "YES",
+                }),
+            ]);
+        const screen = await render(<OperatorDashboardScreen />);
+
+        await waitFor(() => {
+            expect(screen.getByLabelText("Data status: Live")).toBeTruthy();
+        });
+
+        fireEvent.press(screen.getByLabelText("Refresh telemetry"));
+
+        await waitFor(() => {
+            expect(screen.getByText("65%")).toBeTruthy();
+        });
+        expect(mockGetTelemetryObservations).toHaveBeenCalledTimes(2);
+        expect(screen.queryByText("Loading telemetry...")).toBeNull();
     });
 
     it("labels observations older than thirty seconds as stale", async () => {

@@ -66,6 +66,32 @@ describe("telemetryRepository", () => {
         });
     });
 
+    it("preserves nullable coordinates and an absent prediction", () => {
+        expect(
+            mapOperatorObservation({
+                ...feedRow,
+                lat: null,
+                lon: null,
+                prediction_result_id: null,
+                model_run_id: null,
+                crossing_probability: null,
+                risk_level: null,
+                predicted_crossed_yes_no: null,
+                prediction_computed_at: null,
+            }),
+        ).toEqual({
+            ...mapOperatorObservation(feedRow),
+            lat: null,
+            lon: null,
+            predictionResultId: null,
+            modelRunId: null,
+            crossingProbability: null,
+            riskLevel: null,
+            predictedCrossingDecision: null,
+            predictionComputedAt: null,
+        });
+    });
+
     it("queries one bounded scenario and returns mapped observations", async () => {
         mockOverrideTypes.mockResolvedValue({ data: [feedRow], error: null });
 

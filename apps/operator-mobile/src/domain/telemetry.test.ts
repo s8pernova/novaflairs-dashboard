@@ -43,6 +43,24 @@ describe("summarizeTelemetry", () => {
         });
     });
 
+    it("summarizes one observation with nullable position and prediction", () => {
+        expect(
+            summarizeTelemetry([
+                makeObservation({
+                    lat: null,
+                    lon: null,
+                    crossingProbability: null,
+                }),
+            ]),
+        ).toEqual({
+            averageWindSpeed: 4,
+            averageFlameLength: 2,
+            averageBurnTime: 40,
+            highestCrossingProbability: 0,
+            positionedObservationCount: 0,
+        });
+    });
+
     it("calculates averages, highest risk, and positioned count", () => {
         const observations = [
             makeObservation(),
