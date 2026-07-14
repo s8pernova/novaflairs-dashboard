@@ -152,6 +152,9 @@ const action = msg.action;
 let state = flow.get(stateKey);
 
 if (!state) {
+    if (action === "tick") {
+        return [null, null];
+    }
     node.warn("Start a scenario before advancing it");
     return [null, null];
 }

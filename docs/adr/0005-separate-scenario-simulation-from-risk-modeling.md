@@ -19,9 +19,9 @@ Evidence:
       been implemented with automated replay and outcome tests.
 - [x] The container validates and exposes the tracked simulator through
       Node-RED global context without replacing persistent editor flows.
-- [ ] The independent-RNG generator has been replaced by a deterministic,
+- [x] The independent-RNG generator has been replaced by a deterministic,
       stateful scenario simulator.
-- [ ] The simulator produces independently determined observed outcomes.
+- [x] The simulator produces independently determined observed outcomes.
 - [ ] A learned Model v2 service and model-agnostic persistence contract have
       been implemented.
 

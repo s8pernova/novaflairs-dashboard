@@ -97,7 +97,7 @@ Verification:
 
 ## 3. Orchestrate the engine in Node-RED
 
-- [ ] Replace the disabled `Run every 5s -> RNG` path with a dedicated
+- [x] Replace the disabled `Run every 5s -> RNG` path with a dedicated
       `Scenario Simulator` flow.
 - [x] Load the source-controlled scenario definition and simulation module in
       the container runtime.
@@ -110,7 +110,7 @@ Verification:
       insert node.
 - [x] Show the run ID, phase, tick, and status with Node-RED status/debug nodes.
 - [x] Route validation, engine, and database failures to a visible error path.
-- [ ] Keep the Method 2 polling flow separate and label it clearly as the
+- [x] Keep the Method 2 polling flow separate and label it clearly as the
       baseline prediction flow.
 
 Verification:
@@ -120,7 +120,7 @@ Verification:
 - [x] Step advances exactly one tick while paused.
 - [x] Reset returns to the initial deterministic state without stale timers.
 - [x] Trigger Wind Shift uses the same event handling as the scripted event.
-- [ ] Restarting Node-RED does not silently resume a half-finished run.
+- [x] Restarting Node-RED does not silently resume a half-finished run.
 
 ## 4. Record independent outcomes and preserve the baseline
 
@@ -171,11 +171,11 @@ Verification:
 
 ## 6. Make editor changes reviewable and reproducible
 
-- [ ] Export the deployed editor flow and intentionally replace the tracked
+- [x] Export the deployed editor flow and intentionally replace the tracked
       `nodered/flows.json`.
 - [x] Never copy `flows_cred.json`, session data, context state, or runtime
       backups into Git.
-- [ ] Review the exported JSON for credentials, generated IDs, disabled nodes,
+- [x] Review the exported JSON for credentials, generated IDs, disabled nodes,
       stale debug nodes, and accidental workspace changes.
 - [x] Ensure the Docker image copies scenario definitions and simulator modules
       into the runtime seed directory.
@@ -185,7 +185,7 @@ Verification:
 
 Verification:
 
-- [ ] `git diff --check` passes.
+- [x] `git diff --check` passes.
 - [x] Simulator tests pass outside Node-RED.
 - [x] The Compose service starts with no flow errors.
 - [ ] A fresh volume reproduces the committed flow and scenario without manual
