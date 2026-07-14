@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Pressable,
@@ -10,24 +10,29 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { MetricCard } from "@/components/MetricCard";
+import { ObservationDetails } from "@/components/ObservationDetails";
 import { TelemetryPlot } from "@/components/TelemetryPlot";
 import { getTelemetryObservations } from "@/data/telemetryRepository";
 import {
+    isTelemetryStale,
     summarizeTelemetry,
     type TelemetryObservation,
 } from "@/domain/telemetry";
 import { colors, radii, spacing, typography } from "@/theme/tokens";
 
 type LoadState = "loading" | "ready" | "error";
+type ConnectionState = LoadState | "empty" | "stale";
 
 const DEMO_SCENARIO_ID = 1;
 
 const connectionStatuses: Record<
-    LoadState,
+    ConnectionState,
     { label: string; color: string }
 > = {
     loading: { label: "Loading", color: colors.info },
     ready: { label: "Live", color: colors.riskLow },
+    empty: { label: "Empty", color: colors.riskUnknown },
+    stale: { label: "Stale", color: colors.riskElevated },
     error: { label: "Unavailable", color: colors.riskHigh },
 };
 
@@ -36,19 +41,51 @@ export default function OperatorDashboardScreen() {
         [],
     );
     const [loadState, setLoadState] = useState<LoadState>("loading");
+    const [selectedObservationId, setSelectedObservationId] = useState<
+        number | null
+    >(null);
+    const [lastSuccessfulRefreshAt, setLastSuccessfulRefreshAt] = useState<
+        number | null
+    >(null);
+    const [nowMs, setNowMs] = useState(() => Date.now());
+    const isMountedRef = useRef(true);
+
+    const acceptObservations = useCallback(
+        (nextObservations: TelemetryObservation[]) => {
+            if (!isMountedRef.current) return;
+
+            setObservations(nextObservations);
+            setSelectedObservationId((currentId) =>
+                nextObservations.some(
+                    (observation) => observation.id === currentId,
+                )
+                    ? currentId
+                    : null,
+            );
+            const refreshedAt = Date.now();
+            setLastSuccessfulRefreshAt(refreshedAt);
+            setNowMs(refreshedAt);
+            setLoadState("ready");
+        },
+        [],
+    );
+
+    const rejectObservations = useCallback((error: unknown) => {
+        if (!isMountedRef.current) return;
+
+        console.error("Unable to load telemetry observations", error);
+        setLoadState("error");
+    }, []);
 
     const fetchObservations = useCallback(async () => {
         try {
-            const nextObservations = await getTelemetryObservations(
-                DEMO_SCENARIO_ID,
+            acceptObservations(
+                await getTelemetryObservations(DEMO_SCENARIO_ID),
             );
-            setObservations(nextObservations);
-            setLoadState("ready");
         } catch (error) {
-            console.error("Unable to load telemetry observations", error);
-            setLoadState("error");
+            rejectObservations(error);
         }
-    }, []);
+    }, [acceptObservations, rejectObservations]);
 
     const refreshObservations = useCallback(() => {
         setLoadState("loading");
@@ -56,33 +93,44 @@ export default function OperatorDashboardScreen() {
     }, [fetchObservations]);
 
     useEffect(() => {
-        let isActive = true;
-
+        isMountedRef.current = true;
         getTelemetryObservations(DEMO_SCENARIO_ID).then(
-            (nextObservations) => {
-                if (!isActive) return;
-
-                setObservations(nextObservations);
-                setLoadState("ready");
-            },
-            (error: unknown) => {
-                if (!isActive) return;
-
-                console.error("Unable to load telemetry observations", error);
-                setLoadState("error");
-            },
+            acceptObservations,
+            rejectObservations,
         );
-
         return () => {
-            isActive = false;
+            isMountedRef.current = false;
         };
+    }, [acceptObservations, rejectObservations]);
+
+    useEffect(() => {
+        const timer = setInterval(() => setNowMs(Date.now()), 5_000);
+        return () => clearInterval(timer);
     }, []);
 
     const summary = useMemo(
         () => summarizeTelemetry(observations),
         [observations],
     );
-    const connectionStatus = connectionStatuses[loadState];
+    const selectedObservation =
+        observations.find(
+            (observation) => observation.id === selectedObservationId,
+        ) ?? null;
+    const connectionState: ConnectionState =
+        loadState !== "ready"
+            ? loadState
+            : observations.length === 0
+              ? "empty"
+              : isTelemetryStale(observations, nowMs)
+                ? "stale"
+                : "ready";
+    const connectionStatus = connectionStatuses[connectionState];
+
+    const selectObservation = useCallback((observationId: number) => {
+        setSelectedObservationId((currentId) =>
+            currentId === observationId ? null : observationId,
+        );
+    }, []);
 
     return (
         <SafeAreaView style={styles.screen}>
@@ -95,7 +143,10 @@ export default function OperatorDashboardScreen() {
                 </View>
 
                 <View style={styles.headerActions}>
-                    <View style={styles.connectionStatus}>
+                    <View
+                        accessibilityLabel={`Data status: ${connectionStatus.label}`}
+                        style={styles.connectionStatus}
+                    >
                         <View
                             style={[
                                 styles.statusDot,
@@ -106,7 +157,16 @@ export default function OperatorDashboardScreen() {
                             {connectionStatus.label}
                         </Text>
                     </View>
+                    {lastSuccessfulRefreshAt !== null && (
+                        <Text style={styles.lastRefreshText}>
+                            Updated{" "}
+                            {new Date(
+                                lastSuccessfulRefreshAt,
+                            ).toLocaleTimeString()}
+                        </Text>
+                    )}
                     <Pressable
+                        accessibilityLabel="Refresh telemetry"
                         accessibilityRole="button"
                         disabled={loadState === "loading"}
                         onPress={refreshObservations}
@@ -139,6 +199,21 @@ export default function OperatorDashboardScreen() {
                         <Text style={styles.retryButtonText}>Try again</Text>
                     </Pressable>
                 </View>
+            ) : observations.length === 0 ? (
+                <View style={styles.centeredState}>
+                    <Text style={styles.emptyTitle}>No telemetry yet</Text>
+                    <Text style={styles.stateText}>
+                        This scenario has not produced any observations.
+                    </Text>
+                    <Pressable
+                        accessibilityLabel="Refresh empty telemetry feed"
+                        accessibilityRole="button"
+                        onPress={refreshObservations}
+                        style={styles.retryButton}
+                    >
+                        <Text style={styles.retryButtonText}>Refresh</Text>
+                    </Pressable>
+                </View>
             ) : (
                 <ScrollView contentContainerStyle={styles.content}>
                     <View style={styles.metricsRail}>
@@ -168,7 +243,15 @@ export default function OperatorDashboardScreen() {
                         />
                     </View>
 
-                    <TelemetryPlot observations={observations} />
+                    <TelemetryPlot
+                        observations={observations}
+                        onSelectObservation={selectObservation}
+                        selectedObservationId={selectedObservationId}
+                    />
+                    <ObservationDetails
+                        observation={selectedObservation}
+                        onClear={() => setSelectedObservationId(null)}
+                    />
                 </ScrollView>
             )}
         </SafeAreaView>
@@ -221,6 +304,10 @@ const styles = StyleSheet.create({
         fontSize: typography.bodySmall,
         fontWeight: "600",
     },
+    lastRefreshText: {
+        color: colors.textMuted,
+        fontSize: typography.caption,
+    },
     refreshButton: {
         minWidth: 82,
         minHeight: 38,
@@ -260,6 +347,11 @@ const styles = StyleSheet.create({
         fontSize: typography.bodyLarge,
     },
     errorTitle: {
+        color: colors.textPrimary,
+        fontSize: typography.heading,
+        fontWeight: "700",
+    },
+    emptyTitle: {
         color: colors.textPrimary,
         fontSize: typography.heading,
         fontWeight: "700",

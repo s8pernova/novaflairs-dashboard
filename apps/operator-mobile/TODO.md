@@ -141,31 +141,36 @@ the feed returns zero duplicate observations.
 
 Verification:
 
-- [ ] The emulator displays real rows from Supabase.
+- [x] The emulator displays real rows from Supabase.
 - [ ] Temporarily using an invalid URL produces the visible error state.
 - [ ] Restoring valid configuration recovers through the Retry action.
-- [ ] No service-role key, database password, or live `.env.local` is tracked by
+- [x] No service-role key, database password, or live `.env.local` is tracked by
       Git.
+
+Verified on `Galaxy_Tab_A9` on 2026-07-14: the publishable client returned live
+scenario `1` rows, the app rendered them in Expo Go, and the ignored `.env` was
+not present in Git. Invalid-configuration recovery is covered by a screen test,
+but the manual `.env` mutation checks remain intentionally unchecked.
 
 ## 4. Finish the operator interaction model
 
-- [ ] Add selected-observation state to the dashboard screen.
-- [ ] Make every plotted point or map marker a touch target.
-- [ ] Show a compact detail panel for the selected observation with timestamp,
+- [x] Add selected-observation state to the dashboard screen.
+- [x] Make every plotted point or map marker a touch target.
+- [x] Show a compact detail panel for the selected observation with timestamp,
       wind direction, wind speed, flame length, burn time, quality, crossing
       probability, risk level, and predicted crossing decision.
-- [ ] Add a clear selection action without navigating away from the operational
+- [x] Add a clear selection action without navigating away from the operational
       view.
-- [ ] Show when the feed was last successfully refreshed.
-- [ ] Distinguish an empty feed from a network failure.
-- [ ] Mark data stale after a documented threshold instead of continuing to
+- [x] Show when the feed was last successfully refreshed.
+- [x] Distinguish an empty feed from a network failure.
+- [x] Mark data stale after a documented 30-second threshold instead of continuing to
       label old data as live.
-- [ ] Add accessibility labels and roles for refresh, markers, risk status, and
+- [x] Add accessibility labels and roles for refresh, markers, risk status, and
       observation details.
 
 Verification:
 
-- [ ] A marker can be selected and deselected with touch.
+- [x] A marker can be selected and deselected with touch.
 - [ ] Long values and missing nullable values do not break the layout.
 - [ ] Loading, empty, stale, selected, and error states are visually distinct.
 

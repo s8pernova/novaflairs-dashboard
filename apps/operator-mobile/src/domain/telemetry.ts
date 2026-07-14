@@ -1,8 +1,4 @@
-export type TelemetryRiskLevel =
-    | "moderate"
-    | "transition"
-    | "high"
-    | "severe";
+export type TelemetryRiskLevel = "moderate" | "transition" | "high" | "severe";
 
 export type CrossingDecision = "YES" | "NO";
 
@@ -34,6 +30,26 @@ export interface TelemetrySummary {
     averageBurnTime: number;
     highestCrossingProbability: number;
     positionedObservationCount: number;
+}
+
+export const TELEMETRY_STALE_AFTER_MS = 30_000;
+
+export function isTelemetryStale(
+    observations: TelemetryObservation[],
+    nowMs = Date.now(),
+): boolean {
+    if (observations.length === 0) return false;
+
+    const latestObservedAtMs = Math.max(
+        ...observations.map((observation) =>
+            Date.parse(observation.observedAt),
+        ),
+    );
+
+    return (
+        !Number.isFinite(latestObservedAtMs) ||
+        nowMs - latestObservedAtMs > TELEMETRY_STALE_AFTER_MS
+    );
 }
 
 export function summarizeTelemetry(

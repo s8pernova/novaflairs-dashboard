@@ -1,5 +1,7 @@
 import {
+    isTelemetryStale,
     summarizeTelemetry,
+    TELEMETRY_STALE_AFTER_MS,
     type TelemetryObservation,
 } from "@/domain/telemetry";
 
@@ -62,5 +64,37 @@ describe("summarizeTelemetry", () => {
             highestCrossingProbability: 0.65,
             positionedObservationCount: 1,
         });
+    });
+});
+
+describe("isTelemetryStale", () => {
+    const nowMs = Date.parse("2026-07-11T14:20:30Z");
+
+    it("does not label an empty feed as stale", () => {
+        expect(isTelemetryStale([], nowMs)).toBe(false);
+    });
+
+    it("uses the newest observation and the documented threshold", () => {
+        const observations = [
+            makeObservation({ observedAt: "2026-07-11T14:19:00Z" }),
+            makeObservation({
+                id: 2,
+                observedAt: new Date(
+                    nowMs - TELEMETRY_STALE_AFTER_MS,
+                ).toISOString(),
+            }),
+        ];
+
+        expect(isTelemetryStale(observations, nowMs)).toBe(false);
+        expect(isTelemetryStale(observations, nowMs + 1)).toBe(true);
+    });
+
+    it("treats an invalid required timestamp as stale", () => {
+        expect(
+            isTelemetryStale(
+                [makeObservation({ observedAt: "not-a-timestamp" })],
+                nowMs,
+            ),
+        ).toBe(true);
     });
 });

@@ -1,10 +1,12 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { TelemetryObservation } from "@/domain/telemetry";
 import { colors, radii, spacing, typography } from "@/theme/tokens";
 
 interface TelemetryPlotProps {
     observations: TelemetryObservation[];
+    selectedObservationId: number | null;
+    onSelectObservation: (observationId: number) => void;
 }
 
 interface PlotPoint {
@@ -47,7 +49,11 @@ function makePlotPoints(observations: TelemetryObservation[]): PlotPoint[] {
     }));
 }
 
-export function TelemetryPlot({ observations }: TelemetryPlotProps) {
+export function TelemetryPlot({
+    observations,
+    selectedObservationId,
+    onSelectObservation,
+}: TelemetryPlotProps) {
     const points = makePlotPoints(observations);
 
     return (
@@ -61,10 +67,7 @@ export function TelemetryPlot({ observations }: TelemetryPlotProps) {
                 </View>
                 <View style={styles.legend}>
                     <LegendItem color={colors.riskLow} label="Low" />
-                    <LegendItem
-                        color={colors.riskElevated}
-                        label="Elevated"
-                    />
+                    <LegendItem color={colors.riskElevated} label="Elevated" />
                     <LegendItem color={colors.riskHigh} label="High" />
                 </View>
             </View>
@@ -75,24 +78,34 @@ export function TelemetryPlot({ observations }: TelemetryPlotProps) {
                 <View style={[styles.gridLine, styles.verticalOne]} />
                 <View style={[styles.gridLine, styles.verticalTwo]} />
 
-                {points.map(({ observation, left, top }) => (
-                    <View
-                        accessibilityLabel={`Observation ${observation.id}, ${Math.round(
-                            (observation.crossingProbability ?? 0) * 100,
-                        )} percent crossing risk`}
-                        key={observation.id}
-                        style={[
-                            styles.marker,
-                            {
-                                left,
-                                top,
-                                backgroundColor: getRiskColor(
-                                    observation.crossingProbability,
-                                ),
-                            },
-                        ]}
-                    />
-                ))}
+                {points.map(({ observation, left, top }) => {
+                    const isSelected = observation.id === selectedObservationId;
+
+                    return (
+                        <Pressable
+                            accessibilityLabel={`Observation ${observation.id}, ${Math.round(
+                                (observation.crossingProbability ?? 0) * 100,
+                            )} percent crossing risk`}
+                            accessibilityHint="Shows observation details"
+                            accessibilityRole="button"
+                            accessibilityState={{ selected: isSelected }}
+                            key={observation.id}
+                            onPress={() => onSelectObservation(observation.id)}
+                            style={({ pressed }) => [
+                                styles.marker,
+                                isSelected && styles.markerSelected,
+                                pressed && styles.markerPressed,
+                                {
+                                    left,
+                                    top,
+                                    backgroundColor: getRiskColor(
+                                        observation.crossingProbability,
+                                    ),
+                                },
+                            ]}
+                        />
+                    );
+                })}
 
                 {points.length === 0 && (
                     <View style={styles.emptyState}>
@@ -211,13 +224,22 @@ const styles = StyleSheet.create({
     },
     marker: {
         position: "absolute",
-        width: 16,
-        height: 16,
-        marginLeft: -8,
-        marginTop: -8,
+        width: 20,
+        height: 20,
+        marginLeft: -10,
+        marginTop: -10,
         borderRadius: radii.full,
         borderWidth: 2,
         borderColor: colors.textPrimary,
+    },
+    markerSelected: {
+        zIndex: 1,
+        borderWidth: 4,
+        borderColor: colors.white,
+        transform: [{ scale: 1.2 }],
+    },
+    markerPressed: {
+        opacity: 0.7,
     },
     emptyState: {
         flex: 1,
