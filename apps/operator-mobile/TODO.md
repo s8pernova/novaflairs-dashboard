@@ -88,7 +88,7 @@ outputs in `prediction_results`. Crossing probability is not a column on
 - [x] Add the schema change through the repository's migration process. Review
       the migration before running it; do not change the production database by
       hand.
-- [ ] Test the view with the same role the mobile client will use and verify
+- [x] Test the view with the same role the mobile client will use and verify
       that it returns one latest prediction per observation.
 - [x] Decide the prototype's scenario rule. Start with scenario `1` only if the
       seeded `Brushfire Westline 01` remains the intended demo; otherwise pass a
@@ -104,13 +104,15 @@ nullable; prediction fields are null together until a model result exists.
 
 Verification:
 
-- [ ] An anonymous or authenticated client query returns the expected rows.
-- [ ] A client key cannot insert, update, or delete telemetry or predictions.
+- [x] An anonymous or authenticated client query returns the expected rows.
+- [x] A client key cannot insert, update, or delete telemetry or predictions.
 - [x] The view's column names and nullability are recorded before mobile code is
       updated.
 
-Migration `005_operator_observation_feed.sql` is prepared but intentionally not
-applied. The remaining runtime verification boxes require applying it first.
+Verified against the linked project on 2026-07-13: migration
+`20260712033404_operator_observation_feed.sql` is recorded remotely, the `anon`
+role can read scenario `1`, cannot write the feed or its underlying tables, and
+the feed returns zero duplicate observations.
 
 ## 3. Connect the mobile app to Supabase
 
