@@ -290,30 +290,46 @@ Reference:
 ## 9. Produce a shareable Android preview
 
 - [x] Give the app a stable Android package identifier in Expo config.
-- [ ] Replace template icons and splash assets with NOVAflair assets.
+- [x] Replace template icons and splash assets with NOVAflair assets.
 - [x] Add the map provider's restricted Android key through build-time
       configuration.
 - [x] Configure EAS for an internal Android preview profile, or document an
       equivalent reproducible local APK build.
-- [ ] Build and install the preview APK on the target tablet or emulator.
-- [ ] Verify the preview build uses the intended Supabase project and contains
+- [x] Build and install the preview APK on the target tablet or emulator.
+- [x] Verify the preview build uses the intended Supabase project and contains
       no developer-only credentials.
-- [ ] Test cold start, refresh, network loss/recovery, marker selection, and
+- [x] Test cold start, refresh, network loss/recovery, marker selection, and
       landscape layout in the installed build.
-- [ ] Add the final operator-mobile setup and demo commands to the root README.
-- [ ] Update ADR 0001 follow-up checkboxes to reflect what was actually
+- [x] Add the final operator-mobile setup and demo commands to the root README.
+- [x] Update ADR 0001 follow-up checkboxes to reflect what was actually
       completed.
+
+Verified on `Galaxy_Tab_A9` on 2026-07-14 with EAS preview build
+`ae943927-1b97-4dcd-9941-eb22f541ff3e` (APK SHA-256
+`61bf97b1291393bbf0fb53dfa722a0b236bf12aa9a34f13016adee9feaec98f5`).
+The non-debuggable APK cold-started in landscape with Metro stopped, loaded the
+intended Supabase project, rendered Google map tiles, refreshed, selected a
+marker, preserved visible data as stale while app networking was denied, and
+returned to live after networking and fresh telemetry were restored. An APK
+content scan found the expected public Supabase configuration and no Node-RED
+database password, credential secret, or admin password.
 
 ## 10. Final prototype review
 
-- [ ] Run typecheck, lint, unit tests, and the Android bundle/build.
-- [ ] Run the complete Node-RED -> Supabase -> mobile demo once from a clean
+- [x] Run typecheck, lint, unit tests, and the Android bundle/build.
+- [x] Run the complete Node-RED -> Supabase -> mobile demo once from a clean
       start.
-- [ ] Review tracked files for secrets and generated local state.
-- [ ] Review the diff for dead mock-runtime paths, temporary fallbacks, and
+- [x] Review tracked files for secrets and generated local state.
+- [x] Review the diff for dead mock-runtime paths, temporary fallbacks, and
       obsolete documentation.
-- [ ] Record known prototype limitations in the README.
-- [ ] Commit the completed prototype as a coherent, reproducible milestone.
+- [x] Record known prototype limitations in the README.
+- [x] Commit the completed prototype as a coherent, reproducible milestone.
+
+Final clean-start replay on 2026-07-14 used run
+`brushfire-westline-01-1784027594199`: 26 telemetry rows, 26 predictions, and
+26 operator-feed rows. The installed preview selected observation `286674`,
+which mapped to prediction `289404` as `High` at `36%` before the run resolved
+as crossed at 130 simulated seconds.
 
 ## Deferred until after the prototype
 

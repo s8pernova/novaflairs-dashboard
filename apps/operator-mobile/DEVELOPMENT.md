@@ -20,6 +20,13 @@ npm run build:android:development
 
 Ordinary TypeScript, component, and style changes do not need a new APK.
 
+Regenerate the tracked launcher, adaptive, splash, and favicon PNGs after
+changing a `assets/novaflair-*.svg` source:
+
+```bash
+npm run generate:assets
+```
+
 ## Start the app
 
 Run this command from `apps/operator-mobile`:
@@ -50,6 +57,19 @@ To stop that reusable ADB server as well:
 ADB_SERVER_SOCKET="localfilesystem:${XDG_RUNTIME_DIR:-/tmp}/novaflair-operator-adb.sock" \
   /usr/lib/android-sdk/platform-tools/adb kill-server
 ```
+
+## Preview build
+
+The `preview` EAS profile produces an internal-distribution APK with the
+production-style embedded JavaScript bundle:
+
+```bash
+npm run build:android:preview
+```
+
+Unlike the development build, the preview does not use Metro. Its public
+Supabase configuration and restricted Maps key come from the project-scoped EAS
+`preview` environment. Install and test this artifact before a judge demo.
 
 ## Verification
 

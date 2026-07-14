@@ -27,6 +27,61 @@ The existing Cloud project predates Supabase migration history. Read
 `supabase/README.md` before any linked history repair or migration push. Adding
 the committed migration files does not authorize applying them to Cloud.
 
+### Operator Mobile App
+
+The Android tablet prototype lives in `apps/operator-mobile`. Use Node 22 and
+the Windows-hosted `Galaxy_Tab_A9` emulator documented in
+`apps/operator-mobile/DEVELOPMENT.md`.
+
+For normal development:
+
+```bash
+cd apps/operator-mobile
+nvm use
+npm ci
+cp .env.example .env
+npm run android
+```
+
+The ignored `.env` needs the public Supabase URL, publishable key, and restricted
+Google Maps Android key. Never put a service-role key or database password in
+the mobile app.
+
+Create a standalone internal preview with the EAS `preview` environment:
+
+```bash
+cd apps/operator-mobile
+nvm use
+npm run build:android:preview
+```
+
+The EAS environment must define `EXPO_PUBLIC_SUPABASE_URL`,
+`EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `GOOGLE_MAPS_ANDROID_API_KEY`.
+Install the resulting APK on the target tablet; it runs without Metro or Expo
+Go.
+
+For the deterministic operator demo:
+
+```bash
+docker compose up -d --build nodered
+```
+
+Open `http://localhost:1880`, select the `Scenario Simulator` flow, and select
+**Reset**. The mobile app polls Supabase every eight seconds and should cover
+moderate, transition, and high crossing risk. The faster manual replay
+sequence and read-only database trace are documented in `nodered/README.md`.
+
+Current prototype limitations:
+
+- The app reads seeded scenario `1`; scenario selection is not implemented.
+- There is no operator authentication, role-based authorization, or offline
+  cache.
+- Foreground polling is used instead of Supabase Realtime or background work.
+- The simulator is deterministic demonstration software, not a validated
+  wildfire forecast.
+- The preview targets Android tablets; iOS and app-store release work are
+  deferred.
+
 ### Developer Setup (UI)
 
 1. **Create local env file**

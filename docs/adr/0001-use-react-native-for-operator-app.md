@@ -41,7 +41,7 @@ Decision details:
 - The React Native app should consume the same telemetry, prediction, and scenario data contracts as the current dashboard.
 - Shared validation rules, API clients, schemas, and types should be factored into shared packages when duplication appears.
 - The first React Native implementation should prefer Expo unless a concrete native capability requires a bare React Native setup.
-- The mobile app should be added inside this repository, such as `apps/mobile/`, instead of becoming a separate Windows-side project.
+- The mobile app should live at `apps/operator-mobile/` inside this repository instead of becoming a separate Windows-side project.
 
 In scope:
 
@@ -116,9 +116,9 @@ Negative:
 
 Follow-ups:
 
-- [ ] Verify a Windows Android Emulator can be reached from WSL through `adb`.
-- [ ] Create the first React Native app with Expo unless a specific native requirement blocks it.
-- [ ] Add an `apps/mobile/` or equivalent project when implementation starts.
+- [x] Verify a Windows Android Emulator can be reached from WSL through `adb`.
+- [x] Create the first React Native app with Expo unless a specific native requirement blocks it.
+- [x] Add the app at `apps/operator-mobile/` when implementation starts.
 - [ ] Identify shared dashboard/app data contracts that should move into a shared package.
 - [ ] Decide when the Vite dashboard becomes secondary, internal-only, or retired.
 
@@ -137,7 +137,7 @@ Follow-ups:
 
 1. Keep the current Vite dashboard running as the reference UI.
 2. Confirm the Android Studio emulator and WSL `adb` workflow before adding app code.
-3. Start an Expo React Native app in `apps/mobile/` when the first app-specific workflow is ready.
+3. Start an Expo React Native app in `apps/operator-mobile/` when the first app-specific workflow is ready.
 4. Build the first operator-console screen with fake telemetry and prediction data.
 5. Share types, validation, and API clients once duplication appears between the web and mobile UIs.
 6. Move operator-facing workflows into the React Native app over time.
