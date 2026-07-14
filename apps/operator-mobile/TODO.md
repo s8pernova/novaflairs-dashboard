@@ -205,7 +205,7 @@ variable for the development, preview, and production environments.
 
 Verification:
 
-- [ ] The map renders in an Android development build on the Galaxy Tab A9
+- [x] The map renders in an Android development build on the Galaxy Tab A9
       emulator.
 - [ ] Markers appear at the same coordinates returned by Supabase.
 - [ ] Panning, zooming, marker selection, and screen rotation constraints work.

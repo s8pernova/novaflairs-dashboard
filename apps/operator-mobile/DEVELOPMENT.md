@@ -1,57 +1,74 @@
-# Operator mobile learning path
+# Operator mobile development
 
-The app starts with mock telemetry so UI work stays fast and deterministic. Run it
-from this directory with:
+The Android prototype runs as an Expo development build on the Windows-hosted
+`Galaxy_Tab_A9` emulator. Expo and Metro run in WSL with Node 22.
+
+## Prerequisites
+
+- Start the `Galaxy_Tab_A9` AVD in Android Studio.
+- Install the current EAS development APK on the emulator.
+- Create the ignored `.env` from `.env.example` and provide the Supabase values
+  and restricted Google Maps Android key.
+- Run `nvm use 22` and `npm install` from this directory.
+
+Create a new development APK whenever native dependencies or native Expo config
+change:
+
+```bash
+npm run build:android:development
+```
+
+Ordinary TypeScript, component, and style changes do not need a new APK.
+
+## Start the app
+
+Run this command from `apps/operator-mobile`:
 
 ```bash
 npm run android
 ```
 
-Keep the Android emulator running on Windows before starting the app. The Android
-script starts the Windows SDK's ADB server, waits up to 30 seconds for a device,
-and configures the emulator to reach Metro on port 8081. This keeps Expo and Metro
-in WSL while using the Windows-hosted emulator.
+The command performs two jobs:
 
-Edit a component and save it. Metro should update the running app with Fast Refresh.
-Changes to `app.json`, native dependencies, or environment variables can require a
-full reload or restart.
+1. `scripts/android-bridge.sh` starts or reuses a Linux ADB server on a
+   WSL-local Unix socket, connects it to the Windows emulator transport at
+   `127.0.0.1:5555`, and maps Android port 8081 back to WSL Metro.
+2. Expo starts Metro in development-client mode and opens the installed
+   `com.novaflair.operator` application.
 
-## What is already wired
+Keeping the ADB server inside WSL is intentional. An ADB reverse rule owned by
+the Windows server targets Windows localhost, which cannot reach WSL Metro in
+this machine's mirrored-network configuration.
 
-- `App.tsx` owns loading, ready, and error screen states.
-- `src/domain/telemetry.ts` defines the app-facing telemetry shape and summary math.
-- `src/data/telemetryRepository.ts` is the app's data boundary.
-- `src/components/` contains reusable presentation components.
-- `src/data/mockObservations.ts` keeps development independent from the database.
+Keep the terminal open while developing. Saving a TypeScript or style change
+should update the app through Fast Refresh. Stop Metro with `Ctrl+C`; the small
+WSL ADB server remains available for the next run.
 
-## Your first exercises
-
-1. Add a fifth metric to `App.tsx`, such as the latest wind direction.
-2. Make markers in `TelemetryPlot.tsx` selectable with `Pressable`, then show the
-   selected observation's details below the plot.
-3. Replace the body of `getTelemetryObservations` with a Supabase query. Keep the
-   function's return type unchanged so the rest of the app does not care where its
-   data came from.
-4. Replace the coordinate plot with a real React Native map after the data query is
-   working. This should be a separate milestone because a native map adds setup and
-   platform configuration.
-
-## Supabase milestone
-
-Do not put a service-role key in this app. Mobile bundles are public. Use a
-publishable key and protect `telemetry_observations` with Row Level Security.
-
-When you reach exercise 3:
+To stop that reusable ADB server as well:
 
 ```bash
-cp .env.example .env.local
-npx expo install @supabase/supabase-js
+ADB_SERVER_SOCKET="localfilesystem:${XDG_RUNTIME_DIR:-/tmp}/novaflair-operator-adb.sock" \
+  /usr/lib/android-sdk/platform-tools/adb kill-server
 ```
 
-Fill in `.env.local`, create `src/data/supabaseClient.ts`, and query only the fields
-the app uses. Supabase returns the database's snake_case columns, so map each row to
-the camelCase `TelemetryObservation` shape inside the repository. That mapping is an
-important app-development exercise and keeps database details out of components.
+## Verification
 
-Commit `package-lock.json` after installing the dependency. Never commit
-`.env.local`.
+Before committing mobile changes, run:
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+npx expo export --platform android
+```
+
+Native map behavior still needs a manual emulator smoke test: verify map tiles,
+pan and zoom, marker selection, selection clearing, Refresh, and landscape
+layout.
+
+## Data boundary
+
+`src/data/telemetryRepository.ts` reads `operator_observation_feed` through the
+publishable Supabase client and maps database rows into the app-facing
+`TelemetryObservation` type. Never put a service-role key or database password
+in this app; mobile configuration is recoverable from the installed bundle.

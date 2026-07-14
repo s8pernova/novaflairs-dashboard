@@ -30,7 +30,7 @@
   "scripts": {
     "start": "expo start",
     "android:bridge": "bash ./scripts/android-bridge.sh",
-    "android": "npm run android:bridge && ADB_SERVER_SOCKET=tcp:127.0.0.1:5037 ANDROID_HOME=/usr/lib/android-sdk ANDROID_SDK_ROOT=/usr/lib/android-sdk expo start --android --localhost",
+    "android": "npm run android:bridge && ADB_SERVER_SOCKET=localfilesystem:${XDG_RUNTIME_DIR:-/tmp}/novaflair-operator-adb.sock ANDROID_SERIAL=127.0.0.1:5555 ANDROID_HOME=/usr/lib/android-sdk ANDROID_SDK_ROOT=/usr/lib/android-sdk expo start --dev-client --android --localhost",
     "build:android:development": "eas build --platform android --profile development",
     "build:android:preview": "eas build --platform android --profile preview",
     "credentials:android": "eas credentials --platform android",
