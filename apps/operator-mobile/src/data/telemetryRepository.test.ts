@@ -9,7 +9,7 @@ const mockLimit = jest.fn(() => ({ overrideTypes: mockOverrideTypes }));
 const mockOrder = jest.fn(() => ({ limit: mockLimit }));
 const mockEq = jest.fn(() => ({ order: mockOrder }));
 const mockSelect = jest.fn(() => ({ eq: mockEq }));
-const mockFrom = jest.fn(() => ({ select: mockSelect }));
+const mockFrom = jest.fn((_table: string) => ({ select: mockSelect }));
 
 jest.mock("@/data/supabaseClient", () => ({
     supabase: { from: (table: string) => mockFrom(table) },

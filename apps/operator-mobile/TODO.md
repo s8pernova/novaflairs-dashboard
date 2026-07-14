@@ -133,8 +133,8 @@ the feed returns zero duplicate observations.
       `TelemetryObservation` type inside `telemetryRepository.ts`.
 - [x] Query explicit columns, filter by the selected scenario, order by
       `observed_at` descending, and apply a bounded limit such as 25.
-- [x] Keep mock data available for tests and deliberate demo fixtures, but
-      remove it as a silent runtime fallback. A failed real query must produce
+- [x] Remove the silent runtime mock fallback. Keep deterministic fixtures
+      local to the tests that consume them; a failed real query must produce
       the app's error state.
 - [x] Replace the `Training data` header state with an honest connection state:
       loading, live, or unavailable. Stale-data detection belongs to step 4.

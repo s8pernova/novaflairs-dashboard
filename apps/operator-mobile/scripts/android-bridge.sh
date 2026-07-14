@@ -17,7 +17,7 @@ if ! command -v powershell.exe >/dev/null 2>&1; then
   exit 1
 fi
 
-windows_adb_path="$(${linux_adb} version >/dev/null; powershell.exe -NoProfile -NonInteractive -Command '
+windows_adb_path="$(powershell.exe -NoProfile -NonInteractive -Command '
   $adb = Join-Path $env:LOCALAPPDATA "Android\Sdk\platform-tools\adb.exe"
   if (-not (Test-Path -LiteralPath $adb)) {
     Write-Error "Windows adb was not found at $adb."

@@ -7,6 +7,11 @@ from this directory with:
 npm run android
 ```
 
+Keep the Android emulator running on Windows before starting the app. The Android
+script starts the Windows SDK's ADB server, waits up to 30 seconds for a device,
+and configures the emulator to reach Metro on port 8081. This keeps Expo and Metro
+in WSL while using the Windows-hosted emulator.
+
 Edit a component and save it. Metro should update the running app with Fast Refresh.
 Changes to `app.json`, native dependencies, or environment variables can require a
 full reload or restart.
