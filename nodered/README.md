@@ -26,3 +26,12 @@ Credentials are read from environment variables in `nodered/.env`. Start from
 To intentionally update source-controlled flows after editing in the Node-RED
 editor, export the flow and replace `nodered/flows.json` in a separate reviewed
 change.
+
+## Scenario simulator
+
+The current independent-RNG telemetry generator is being replaced by a
+deterministic, stateful scenario simulator. Follow `TODO.md` for the ordered
+implementation and verification steps. The responsibility boundaries between
+Node-RED orchestration, Supabase persistence, the Method 2 baseline, and a
+future learned model are recorded in
+`docs/adr/0005-separate-scenario-simulation-from-risk-modeling.md`.
