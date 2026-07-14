@@ -20,6 +20,17 @@ import { colors, radii, spacing, typography } from "@/theme/tokens";
 
 type LoadState = "loading" | "ready" | "error";
 
+const DEMO_SCENARIO_ID = 1;
+
+const connectionStatuses: Record<
+    LoadState,
+    { label: string; color: string }
+> = {
+    loading: { label: "Loading", color: colors.info },
+    ready: { label: "Live", color: colors.riskLow },
+    error: { label: "Unavailable", color: colors.riskHigh },
+};
+
 export default function OperatorDashboardScreen() {
     const [observations, setObservations] = useState<TelemetryObservation[]>(
         [],
@@ -28,7 +39,9 @@ export default function OperatorDashboardScreen() {
 
     const fetchObservations = useCallback(async () => {
         try {
-            const nextObservations = await getTelemetryObservations();
+            const nextObservations = await getTelemetryObservations(
+                DEMO_SCENARIO_ID,
+            );
             setObservations(nextObservations);
             setLoadState("ready");
         } catch (error) {
@@ -45,7 +58,7 @@ export default function OperatorDashboardScreen() {
     useEffect(() => {
         let isActive = true;
 
-        getTelemetryObservations().then(
+        getTelemetryObservations(DEMO_SCENARIO_ID).then(
             (nextObservations) => {
                 if (!isActive) return;
 
@@ -69,6 +82,7 @@ export default function OperatorDashboardScreen() {
         () => summarizeTelemetry(observations),
         [observations],
     );
+    const connectionStatus = connectionStatuses[loadState];
 
     return (
         <SafeAreaView style={styles.screen}>
@@ -82,8 +96,15 @@ export default function OperatorDashboardScreen() {
 
                 <View style={styles.headerActions}>
                     <View style={styles.connectionStatus}>
-                        <View style={styles.statusDot} />
-                        <Text style={styles.statusText}>Training data</Text>
+                        <View
+                            style={[
+                                styles.statusDot,
+                                { backgroundColor: connectionStatus.color },
+                            ]}
+                        />
+                        <Text style={styles.statusText}>
+                            {connectionStatus.label}
+                        </Text>
                     </View>
                     <Pressable
                         accessibilityRole="button"
@@ -194,7 +215,6 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: radii.full,
-        backgroundColor: colors.riskLow,
     },
     statusText: {
         color: colors.textSecondary,

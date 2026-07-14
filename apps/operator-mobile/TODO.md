@@ -128,16 +128,16 @@ the feed returns zero duplicate observations.
 - [x] Because this prototype has no login, configure the client without
       persistent auth-session storage. Add session storage only when auth is a
       real feature.
-- [ ] Add a raw database-row type for `operator_observation_feed`.
-- [ ] Map the view's snake_case row into the camelCase
+- [x] Add a raw database-row type for `operator_observation_feed`.
+- [x] Map the view's snake_case row into the camelCase
       `TelemetryObservation` type inside `telemetryRepository.ts`.
-- [ ] Query explicit columns, filter by the selected scenario, order by
+- [x] Query explicit columns, filter by the selected scenario, order by
       `observed_at` descending, and apply a bounded limit such as 25.
-- [ ] Keep mock data available for tests and deliberate demo fixtures, but
+- [x] Keep mock data available for tests and deliberate demo fixtures, but
       remove it as a silent runtime fallback. A failed real query must produce
       the app's error state.
-- [ ] Replace the `Training data` header state with an honest connection state:
-      loading, live, stale, or unavailable.
+- [x] Replace the `Training data` header state with an honest connection state:
+      loading, live, or unavailable. Stale-data detection belongs to step 4.
 
 Verification:
 

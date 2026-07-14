@@ -8,14 +8,24 @@ function makeObservation(
 ): TelemetryObservation {
     return {
         id: 1,
+        scenarioId: 1,
+        firebreakSegmentId: 1,
+        droneId: "drone-01",
         observedAt: "2026-07-11T14:20:00Z",
         lat: 38.8123,
         lon: -77.0931,
+        altitudeM: 42,
         windSpeedMps: 4,
         windDirectionDeg: 315,
         flameLengthM: 2,
         burnTimeS: 40,
+        qualityScore: 0.92,
+        predictionResultId: 101,
+        modelRunId: 1,
         crossingProbability: 0.2,
+        riskLevel: "moderate",
+        predictedCrossingDecision: "NO",
+        predictionComputedAt: "2026-07-11T14:20:01Z",
         ...overrides,
     };
 }

@@ -1,13 +1,31 @@
+export type TelemetryRiskLevel =
+    | "moderate"
+    | "transition"
+    | "high"
+    | "severe";
+
+export type CrossingDecision = "YES" | "NO";
+
 export interface TelemetryObservation {
     id: number;
+    scenarioId: number;
+    firebreakSegmentId: number | null;
+    droneId: string;
     observedAt: string;
     lat: number | null;
     lon: number | null;
+    altitudeM: number | null;
     windSpeedMps: number;
     windDirectionDeg: number | null;
     flameLengthM: number;
     burnTimeS: number;
+    qualityScore: number | null;
+    predictionResultId: number | null;
+    modelRunId: number | null;
     crossingProbability: number | null;
+    riskLevel: TelemetryRiskLevel | null;
+    predictedCrossingDecision: CrossingDecision | null;
+    predictionComputedAt: string | null;
 }
 
 export interface TelemetrySummary {
