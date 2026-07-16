@@ -59,7 +59,7 @@ function makeObservation(
 
 describe("OperatorDashboardScreen", () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        mockGetTelemetryObservations.mockReset();
     });
 
     it("shows an explicit loading state while the first request is pending", async () => {
@@ -94,7 +94,22 @@ describe("OperatorDashboardScreen", () => {
             screen.getByLabelText("Clear selected observation"),
         );
         await waitFor(() => {
-            expect(screen.getByText("No observation selected")).toBeTruthy();
+            expect(screen.getByText("MISSION STATUS")).toBeTruthy();
+        });
+    });
+
+    it("toggles operational map layers through accessible switches", async () => {
+        mockGetTelemetryObservations.mockResolvedValue([makeObservation()]);
+        const screen = await render(<OperatorDashboardScreen />);
+
+        await waitFor(() => {
+            expect(screen.getByLabelText("Hide wind vectors")).toBeTruthy();
+        });
+
+        await fireEvent.press(screen.getByLabelText("Hide wind vectors"));
+
+        await waitFor(() => {
+            expect(screen.getByLabelText("Show wind vectors")).toBeTruthy();
         });
     });
 
@@ -126,7 +141,7 @@ describe("OperatorDashboardScreen", () => {
             expect.any(Error),
         );
 
-        await fireEvent.press(screen.getByText("Try again"));
+        await fireEvent.press(screen.getByLabelText("Try again"));
 
         await waitFor(() => {
             expect(screen.getByLabelText("Data status: Live")).toBeTruthy();
@@ -153,7 +168,9 @@ describe("OperatorDashboardScreen", () => {
         fireEvent.press(screen.getByLabelText("Refresh telemetry"));
 
         await waitFor(() => {
-            expect(screen.getByText("65%")).toBeTruthy();
+            expect(
+                screen.getByLabelText("Crossing probability 65 percent"),
+            ).toBeTruthy();
         });
         expect(mockGetTelemetryObservations).toHaveBeenCalledTimes(2);
         expect(screen.queryByText("Loading telemetry...")).toBeNull();

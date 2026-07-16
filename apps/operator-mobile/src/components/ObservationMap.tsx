@@ -8,6 +8,7 @@ import {
 import { StyleSheet, Text, View } from "react-native";
 import MapView, { Marker, Polyline, type LatLng } from "react-native-maps";
 
+import type { MapLayerVisibility } from "@/components/MissionHud";
 import {
     getInitialRegion,
     getMarkerColor,
@@ -16,9 +17,10 @@ import {
     isPositionedObservation,
 } from "@/components/observationMapHelpers";
 import type { TelemetryObservation } from "@/domain/telemetry";
-import { colors, radii, spacing, typography } from "@/theme/tokens";
+import { colors, radii, typography } from "@/theme/tokens";
 
 interface ObservationMapProps {
+    layers: MapLayerVisibility;
     observations: TelemetryObservation[];
     selectedObservationId: number | null;
     onSelectObservation: (observationId: number) => void;
@@ -27,14 +29,47 @@ interface ObservationMapProps {
 const mapStyle: NonNullable<
     ComponentProps<typeof MapView>["customMapStyle"]
 > = [
-    { elementType: "geometry", stylers: [{ color: "#1b2a30" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#9aa8b2" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#11171d" }] },
-    { featureType: "road", elementType: "geometry", stylers: [{ color: "#31404a" }] },
-    { featureType: "water", elementType: "geometry", stylers: [{ color: "#13222b" }] },
+    { elementType: "geometry", stylers: [{ color: "#60776b" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#102028" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#91a597" }] },
+    {
+        featureType: "administrative",
+        elementType: "geometry",
+        stylers: [{ color: "#52685f" }],
+    },
+    {
+        featureType: "landscape.natural",
+        elementType: "geometry",
+        stylers: [{ color: "#718b79" }],
+    },
+    {
+        featureType: "poi.park",
+        elementType: "geometry",
+        stylers: [{ color: "#6f8d75" }],
+    },
+    {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [{ color: "#656f69" }],
+    },
+    {
+        featureType: "road.highway",
+        elementType: "geometry",
+        stylers: [{ color: "#59636b" }],
+    },
+    {
+        featureType: "water",
+        elementType: "geometry",
+        stylers: [{ color: "#3f6870" }],
+    },
 ];
 
+const hideLabelsStyle: NonNullable<
+    ComponentProps<typeof MapView>["customMapStyle"]
+> = [{ elementType: "labels", stylers: [{ visibility: "off" }] }];
+
 export function ObservationMap({
+    layers,
     observations,
     selectedObservationId,
     onSelectObservation,
@@ -53,6 +88,10 @@ export function ObservationMap({
             })),
         [positionedObservations],
     );
+    const pathCoordinates = useMemo(
+        () => [...coordinates].reverse(),
+        [coordinates],
+    );
     const initialRegion = useMemo(
         () => getInitialRegion(coordinates),
         [coordinates],
@@ -69,56 +108,51 @@ export function ObservationMap({
 
         mapRef.current.fitToCoordinates(coordinates, {
             animated: false,
-            edgePadding: { top: 48, right: 48, bottom: 48, left: 48 },
+            edgePadding: { top: 160, right: 330, bottom: 150, left: 236 },
         });
         hasFitInitialCameraRef.current = true;
     }, [coordinates]);
 
     return (
-        <View style={styles.panel}>
-            <View style={styles.panelHeader}>
-                <View>
-                    <Text style={styles.title}>Site overview</Text>
-                    <Text style={styles.subtitle}>
-                        Observation positions, wind, and risk
-                    </Text>
+        <View style={styles.canvas}>
+            {initialRegion === null ? (
+                <View style={styles.emptyState}>
+                    <Text style={styles.emptyText}>No positioned observations</Text>
                 </View>
-                <View style={styles.legend}>
-                    <LegendItem color={colors.riskLow} label="Moderate" />
-                    <LegendItem color={colors.riskElevated} label="Transition" />
-                    <LegendItem color={colors.riskHigh} label="High" />
-                </View>
-            </View>
-
-            <View style={styles.mapFrame}>
-                {initialRegion === null ? (
-                    <View style={styles.emptyState}>
-                        <Text style={styles.emptyText}>
-                            No positioned observations
-                        </Text>
-                    </View>
-                ) : (
-                    <MapView
-                        accessibilityLabel="Observation map"
-                        customMapStyle={[...mapStyle]}
-                        initialRegion={initialRegion}
-                        loadingBackgroundColor={colors.plot}
-                        loadingEnabled
-                        loadingIndicatorColor={colors.accent}
-                        mapPadding={{ top: 12, right: 12, bottom: 12, left: 12 }}
-                        onMapReady={fitInitialCamera}
-                        pitchEnabled={false}
-                        ref={mapRef}
-                        rotateEnabled={false}
-                        showsBuildings={false}
-                        showsCompass
-                        showsIndoors={false}
-                        showsPointsOfInterests={false}
-                        showsTraffic={false}
-                        style={styles.map}
-                        toolbarEnabled={false}
-                    >
-                        {positionedObservations.map((observation) => {
+            ) : (
+                <MapView
+                    accessibilityLabel="Observation map"
+                    customMapStyle={[
+                        ...mapStyle,
+                        ...(layers.labels ? [] : hideLabelsStyle),
+                    ]}
+                    initialRegion={initialRegion}
+                    loadingBackgroundColor={colors.plot}
+                    loadingEnabled
+                    loadingIndicatorColor={colors.info}
+                    mapPadding={{ top: 52, right: 24, bottom: 24, left: 24 }}
+                    onMapReady={fitInitialCamera}
+                    pitchEnabled={false}
+                    ref={mapRef}
+                    rotateEnabled={false}
+                    showsBuildings={false}
+                    showsCompass={false}
+                    showsIndoors={false}
+                    showsPointsOfInterests={false}
+                    showsTraffic={false}
+                    style={styles.map}
+                    toolbarEnabled={false}
+                >
+                    {layers.path && pathCoordinates.length > 1 && (
+                        <Polyline
+                            coordinates={pathCoordinates}
+                            lineCap="round"
+                            lineJoin="round"
+                            strokeColor={colors.warning}
+                            strokeWidth={4}
+                        />
+                    )}
+                    {positionedObservations.map((observation) => {
                             const coordinate = {
                                 latitude: observation.lat,
                                 longitude: observation.lon,
@@ -131,7 +165,8 @@ export function ObservationMap({
 
                             return (
                                 <Fragment key={observation.id}>
-                                    {observation.windDirectionDeg !== null && (
+                                    {layers.wind &&
+                                        observation.windDirectionDeg !== null && (
                                         <Polyline
                                             coordinates={[
                                                 coordinate,
@@ -139,10 +174,10 @@ export function ObservationMap({
                                             ]}
                                             lineCap="round"
                                             strokeColor={colors.info}
-                                            strokeWidth={2}
+                                            strokeWidth={3}
                                         />
                                     )}
-                                    <Marker
+                                    {layers.observations && <Marker
                                         accessibilityLabel={`Observation ${observation.id}, ${Math.round(
                                             (observation.crossingProbability ?? 0) *
                                                 100,
@@ -173,90 +208,20 @@ export function ObservationMap({
                                                     styles.markerSelected,
                                             ]}
                                         />
-                                    </Marker>
+                                    </Marker>}
                                 </Fragment>
                             );
                         })}
-                    </MapView>
-                )}
-            </View>
-
-            <View style={styles.footer}>
-                <Text style={styles.footerLabel}>N</Text>
-                <Text style={styles.footerText}>
-                    {positionedObservations.length} mapped observations
-                </Text>
-                <Text style={styles.footerText}>Wind vectors point downwind</Text>
-            </View>
-        </View>
-    );
-}
-
-function LegendItem({ color, label }: { color: string; label: string }) {
-    return (
-        <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: color }]} />
-            <Text style={styles.legendText}>{label}</Text>
+                </MapView>
+            )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    panel: {
+    canvas: {
         flex: 1,
-        minWidth: 360,
-        minHeight: 374,
         overflow: "hidden",
-        borderRadius: radii.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.surface,
-    },
-    panelHeader: {
-        minHeight: 62,
-        paddingHorizontal: spacing.lg,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    title: {
-        color: colors.textPrimary,
-        fontSize: typography.panelTitle,
-        fontWeight: "700",
-    },
-    subtitle: {
-        marginTop: spacing.xs,
-        color: colors.textMuted,
-        fontSize: typography.caption,
-    },
-    legend: {
-        flexDirection: "row",
-        gap: spacing.md,
-    },
-    legendItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: spacing.xs,
-    },
-    legendDot: {
-        width: 7,
-        height: 7,
-        borderRadius: radii.full,
-    },
-    legendText: {
-        color: colors.riskUnknown,
-        fontSize: typography.caption,
-    },
-    mapFrame: {
-        flex: 1,
-        minHeight: 270,
-        margin: spacing.lg,
-        overflow: "hidden",
-        borderRadius: radii.sm,
-        borderWidth: 1,
-        borderColor: colors.mapBorder,
         backgroundColor: colors.plot,
     },
     map: {
@@ -267,7 +232,11 @@ const styles = StyleSheet.create({
         minHeight: 16,
         borderRadius: radii.full,
         borderWidth: 2,
-        borderColor: colors.textPrimary,
+        borderColor: colors.white,
+        shadowColor: "#000000",
+        shadowOpacity: 0.45,
+        shadowRadius: 4,
+        elevation: 5,
     },
     markerSelected: {
         borderWidth: 4,
@@ -282,23 +251,5 @@ const styles = StyleSheet.create({
     emptyText: {
         color: colors.textMuted,
         fontSize: typography.body,
-    },
-    footer: {
-        minHeight: 38,
-        paddingHorizontal: spacing.lg,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: spacing.lg,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-    footerLabel: {
-        color: colors.info,
-        fontSize: typography.bodySmall,
-        fontWeight: "800",
-    },
-    footerText: {
-        color: colors.textMuted,
-        fontSize: typography.caption,
     },
 });

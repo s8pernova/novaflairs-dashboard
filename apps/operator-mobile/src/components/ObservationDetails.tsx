@@ -131,13 +131,18 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
     panel: {
-        width: 260,
-        minHeight: 374,
+        width: 304,
+        minHeight: 328,
         overflow: "hidden",
         borderRadius: radii.md,
         borderWidth: 1,
         borderColor: colors.border,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.surfaceGlass,
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.28,
+        shadowRadius: 12,
+        elevation: 8,
     },
     emptyPanel: {
         alignItems: "center",
@@ -158,8 +163,8 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     header: {
-        minHeight: 62,
-        paddingHorizontal: spacing.lg,
+        minHeight: 52,
+        paddingHorizontal: spacing.md,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
@@ -176,14 +181,14 @@ const styles = StyleSheet.create({
         fontWeight: "700",
     },
     title: {
-        marginTop: spacing.xs,
+        marginTop: 2,
         color: colors.textPrimary,
         fontSize: typography.panelTitle,
         fontWeight: "700",
     },
     clearButton: {
-        minWidth: 54,
-        minHeight: 34,
+        minWidth: 52,
+        minHeight: 30,
         alignItems: "center",
         justifyContent: "center",
         borderRadius: radii.sm,
@@ -191,7 +196,7 @@ const styles = StyleSheet.create({
         borderColor: colors.borderStrong,
     },
     clearButtonPressed: {
-        opacity: 0.72,
+        opacity: 0.66,
     },
     clearButtonText: {
         color: colors.textSecondary,
@@ -199,11 +204,11 @@ const styles = StyleSheet.create({
         fontWeight: "700",
     },
     rows: {
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.xs,
     },
     row: {
-        minHeight: 36,
+        minHeight: 32,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
@@ -213,7 +218,7 @@ const styles = StyleSheet.create({
     },
     rowLabel: {
         color: colors.textMuted,
-        fontSize: typography.caption,
+        fontSize: 9,
     },
     rowValue: {
         flex: 1,

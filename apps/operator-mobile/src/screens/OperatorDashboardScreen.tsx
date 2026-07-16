@@ -1,21 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { MetricCard } from "@/components/MetricCard";
+import {
+    AlertsPanel,
+    FlameTrend,
+    LayerControls,
+    MissionStatus,
+    RiskGauge,
+    TopBar,
+    WindConditions,
+    type MapLayerVisibility,
+} from "@/components/MissionHud";
 import { ObservationDetails } from "@/components/ObservationDetails";
 import { ObservationMap } from "@/components/ObservationMap";
-import {
-    isTelemetryStale,
-    summarizeTelemetry,
-} from "@/domain/telemetry";
+import { isTelemetryStale, summarizeTelemetry } from "@/domain/telemetry";
 import { useTelemetryFeed } from "@/hooks/useTelemetryFeed";
 import { colors, radii, spacing, typography } from "@/theme/tokens";
 
@@ -35,6 +34,13 @@ const connectionStatuses: Record<
     error: { label: "Unavailable", color: colors.riskHigh },
 };
 
+const initialLayers: MapLayerVisibility = {
+    observations: true,
+    wind: true,
+    path: true,
+    labels: true,
+};
+
 export default function OperatorDashboardScreen() {
     const {
         observations,
@@ -47,6 +53,8 @@ export default function OperatorDashboardScreen() {
     const [selectedObservationId, setSelectedObservationId] = useState<
         number | null
     >(null);
+    const [layers, setLayers] =
+        useState<MapLayerVisibility>(initialLayers);
     const [nowMs, setNowMs] = useState(() => Date.now());
 
     useEffect(() => {
@@ -62,6 +70,7 @@ export default function OperatorDashboardScreen() {
         observations.find(
             (observation) => observation.id === selectedObservationId,
         ) ?? null;
+    const latestObservation = observations[0] ?? null;
     const connectionState: ConnectionState =
         loadState !== "ready"
             ? loadState
@@ -77,260 +86,229 @@ export default function OperatorDashboardScreen() {
             currentId === observationId ? null : observationId,
         );
     }, []);
+    const toggleLayer = useCallback((layer: keyof MapLayerVisibility) => {
+        setLayers((current) => ({ ...current, [layer]: !current[layer] }));
+    }, []);
 
     return (
         <SafeAreaView style={styles.screen}>
-            <View style={styles.header}>
-                <View>
-                    <Text style={styles.eyebrow}>
-                        NOVAFLAIR FIELD OPERATIONS
-                    </Text>
-                    <Text style={styles.title}>Live fire telemetry</Text>
-                </View>
-
-                <View style={styles.headerActions}>
-                    <View
-                        accessibilityLabel={`Data status: ${connectionStatus.label}`}
-                        style={styles.connectionStatus}
-                    >
-                        <View
-                            style={[
-                                styles.statusDot,
-                                { backgroundColor: connectionStatus.color },
-                            ]}
-                        />
-                        <Text style={styles.statusText}>
-                            {connectionStatus.label}
-                        </Text>
-                    </View>
-                    {lastSuccessfulRefreshAt !== null && (
-                        <Text style={styles.lastRefreshText}>
-                            Updated{" "}
-                            {new Date(
-                                lastSuccessfulRefreshAt,
-                            ).toLocaleTimeString()}
-                        </Text>
-                    )}
-                    {isRefreshing && (
-                        <View style={styles.refreshingStatus}>
-                            <ActivityIndicator
-                                color={colors.info}
-                                size="small"
-                            />
-                            <Text style={styles.lastRefreshText}>
-                                Refreshing
-                            </Text>
-                        </View>
-                    )}
-                    <Pressable
-                        accessibilityLabel="Refresh telemetry"
-                        accessibilityRole="button"
-                        disabled={loadState === "loading" || isRefreshing}
-                        onPress={() => void refresh()}
-                        style={({ pressed }) => [
-                            styles.refreshButton,
-                            pressed && styles.refreshButtonPressed,
-                        ]}
-                    >
-                        <Text style={styles.refreshButtonText}>Refresh</Text>
-                    </Pressable>
-                </View>
-            </View>
-
-            {loadState === "loading" ? (
-                <View style={styles.centeredState}>
-                    <ActivityIndicator color={colors.accent} size="large" />
-                    <Text style={styles.stateText}>Loading telemetry...</Text>
-                </View>
-            ) : loadState === "error" ? (
-                <View style={styles.centeredState}>
-                    <Text style={styles.errorTitle}>Telemetry unavailable</Text>
-                    <Text style={styles.stateText}>
-                        Check the data source and try again.
-                    </Text>
-                    <Pressable
-                        accessibilityRole="button"
-                        onPress={() => void refresh()}
-                        style={styles.retryButton}
-                    >
-                        <Text style={styles.retryButtonText}>Try again</Text>
-                    </Pressable>
-                </View>
-            ) : observations.length === 0 ? (
-                <View style={styles.centeredState}>
-                    <Text style={styles.emptyTitle}>No telemetry yet</Text>
-                    <Text style={styles.stateText}>
-                        This scenario has not produced any observations.
-                    </Text>
-                    <Pressable
-                        accessibilityLabel="Refresh empty telemetry feed"
-                        accessibilityRole="button"
-                        onPress={() => void refresh()}
-                        style={styles.retryButton}
-                    >
-                        <Text style={styles.retryButtonText}>Refresh</Text>
-                    </Pressable>
-                </View>
-            ) : (
-                <ScrollView contentContainerStyle={styles.content}>
-                    <View style={styles.metricsRail}>
-                        <MetricCard
-                            accent={colors.riskHigh}
-                            label="Crossing risk"
-                            value={`${Math.round(summary.highestCrossingProbability * 100)}%`}
-                            detail="Highest current estimate"
-                        />
-                        <MetricCard
-                            accent={colors.info}
-                            label="Wind speed"
-                            value={`${summary.averageWindSpeed.toFixed(1)} m/s`}
-                            detail="Average across sensors"
-                        />
-                        <MetricCard
-                            accent={colors.riskElevated}
-                            label="Flame length"
-                            value={`${summary.averageFlameLength.toFixed(1)} m`}
-                            detail="Average observed length"
-                        />
-                        <MetricCard
-                            accent={colors.riskLow}
-                            label="Burn time"
-                            value={`${summary.averageBurnTime.toFixed(0)} s`}
-                            detail={`${summary.positionedObservationCount} mapped observations`}
-                        />
-                    </View>
-
+            {loadState === "ready" && observations.length > 0 && (
+                <View style={StyleSheet.absoluteFill}>
                     <ObservationMap
+                        layers={layers}
                         observations={observations}
                         onSelectObservation={selectObservation}
                         selectedObservationId={selectedObservationId}
                     />
-                    <ObservationDetails
-                        observation={selectedObservation}
-                        onClear={() => setSelectedObservationId(null)}
-                    />
-                </ScrollView>
+                    <View pointerEvents="none" style={styles.mapTint} />
+                </View>
             )}
+
+            <TopBar
+                connectionColor={connectionStatus.color}
+                connectionLabel={connectionStatus.label}
+                isRefreshing={isRefreshing}
+                lastSuccessfulRefreshAt={lastSuccessfulRefreshAt}
+                onRefresh={() => void refresh()}
+                refreshDisabled={loadState === "loading" || isRefreshing}
+            />
+
+            {loadState === "loading" ? (
+                <StatePanel
+                    message="Establishing the live operator feed."
+                    title="Loading telemetry..."
+                >
+                    <ActivityIndicator color={colors.info} size="large" />
+                </StatePanel>
+            ) : loadState === "error" ? (
+                <StatePanel
+                    message="Check the data source and try again."
+                    title="Telemetry unavailable"
+                >
+                    <Pressable
+                        accessibilityLabel="Try again"
+                        accessibilityRole="button"
+                        onPress={() => void refresh()}
+                        style={({ pressed }) => [
+                            styles.retryButton,
+                            pressed && styles.buttonPressed,
+                        ]}
+                    >
+                        <Text style={styles.retryButtonText}>TRY AGAIN</Text>
+                    </Pressable>
+                </StatePanel>
+            ) : observations.length === 0 ? (
+                <StatePanel
+                    message="This scenario has not produced any observations."
+                    title="No telemetry yet"
+                >
+                    <Pressable
+                        accessibilityLabel="Refresh empty telemetry feed"
+                        accessibilityRole="button"
+                        onPress={() => void refresh()}
+                        style={({ pressed }) => [
+                            styles.retryButton,
+                            pressed && styles.buttonPressed,
+                        ]}
+                    >
+                        <Text style={styles.retryButtonText}>REFRESH</Text>
+                    </Pressable>
+                </StatePanel>
+            ) : latestObservation !== null ? (
+                <View pointerEvents="box-none" style={styles.hudLayer}>
+                    <View style={styles.layerPosition}>
+                        <LayerControls layers={layers} onToggle={toggleLayer} />
+                    </View>
+                    <View style={styles.gaugePosition}>
+                        <RiskGauge
+                            probability={summary.highestCrossingProbability}
+                        />
+                    </View>
+                    <View style={styles.rightPosition}>
+                        {selectedObservation === null ? (
+                            <MissionStatus
+                                observations={observations}
+                                summary={summary}
+                            />
+                        ) : (
+                            <ObservationDetails
+                                observation={selectedObservation}
+                                onClear={() => setSelectedObservationId(null)}
+                            />
+                        )}
+                    </View>
+                    <View style={styles.bottomHud}>
+                        <WindConditions observation={latestObservation} />
+                        <FlameTrend observations={observations} />
+                        <AlertsPanel
+                            connectionLabel={connectionStatus.label}
+                            observations={observations}
+                            probability={summary.highestCrossingProbability}
+                        />
+                    </View>
+                </View>
+            ) : null}
         </SafeAreaView>
+    );
+}
+
+function StatePanel({
+    children,
+    message,
+    title,
+}: {
+    children: React.ReactNode;
+    message: string;
+    title: string;
+}) {
+    return (
+        <View style={styles.centeredState}>
+            <View style={styles.statePanel}>
+                <Text style={styles.stateEyebrow}>NOVAFLAIR OPERATOR</Text>
+                <Text style={styles.stateTitle}>{title}</Text>
+                <Text style={styles.stateText}>{message}</Text>
+                <View style={styles.stateAction}>{children}</View>
+            </View>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+        overflow: "hidden",
         backgroundColor: colors.background,
     },
-    header: {
-        minHeight: 78,
-        paddingHorizontal: spacing.xl,
-        paddingVertical: spacing.lg,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+    mapTint: {
+        position: "absolute",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        backgroundColor: "rgba(7, 14, 10, 0.18)",
+    },
+    hudLayer: {
+        flex: 1,
+    },
+    layerPosition: {
+        position: "absolute",
+        top: spacing.md,
+        left: spacing.md,
+    },
+    gaugePosition: {
+        position: "absolute",
+        top: spacing.md,
+        left: "50%",
+        marginLeft: -143,
+    },
+    rightPosition: {
+        position: "absolute",
+        top: spacing.md,
+        right: spacing.md,
+    },
+    bottomHud: {
+        position: "absolute",
+        right: spacing.md,
+        bottom: spacing.md,
+        left: spacing.md,
         flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-    },
-    eyebrow: {
-        color: colors.textMuted,
-        fontSize: typography.caption,
-        fontWeight: "700",
-    },
-    title: {
-        marginTop: spacing.xs,
-        color: colors.textPrimary,
-        fontSize: typography.title,
-        fontWeight: "700",
-    },
-    headerActions: {
-        flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-end",
         gap: spacing.md,
-    },
-    connectionStatus: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: spacing.sm,
-    },
-    statusDot: {
-        width: 8,
-        height: 8,
-        borderRadius: radii.full,
-    },
-    statusText: {
-        color: colors.textSecondary,
-        fontSize: typography.bodySmall,
-        fontWeight: "600",
-    },
-    lastRefreshText: {
-        color: colors.textMuted,
-        fontSize: typography.caption,
-    },
-    refreshingStatus: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: spacing.xs,
-    },
-    refreshButton: {
-        minWidth: 82,
-        minHeight: 38,
-        paddingHorizontal: spacing.lg,
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: radii.md,
-        backgroundColor: colors.accent,
-    },
-    refreshButtonPressed: {
-        opacity: 0.72,
-    },
-    refreshButtonText: {
-        color: colors.white,
-        fontSize: typography.body,
-        fontWeight: "700",
-    },
-    content: {
-        flexGrow: 1,
-        flexDirection: "row",
-        gap: spacing.lg,
-        padding: spacing.lg,
-    },
-    metricsRail: {
-        width: 232,
-        gap: 10,
     },
     centeredState: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        gap: spacing.md,
         padding: spacing.xl,
+        backgroundColor: colors.background,
     },
-    stateText: {
-        color: colors.riskUnknown,
-        fontSize: typography.bodyLarge,
-    },
-    errorTitle: {
-        color: colors.textPrimary,
-        fontSize: typography.heading,
-        fontWeight: "700",
-    },
-    emptyTitle: {
-        color: colors.textPrimary,
-        fontSize: typography.heading,
-        fontWeight: "700",
-    },
-    retryButton: {
-        marginTop: spacing.xs,
-        minHeight: 40,
-        paddingHorizontal: 18,
+    statePanel: {
+        width: 430,
         alignItems: "center",
-        justifyContent: "center",
+        padding: 32,
         borderRadius: radii.md,
         borderWidth: 1,
-        borderColor: colors.borderStrong,
+        borderColor: colors.border,
+        backgroundColor: colors.surfaceGlass,
+    },
+    stateEyebrow: {
+        color: colors.info,
+        fontSize: typography.caption,
+        fontWeight: "900",
+    },
+    stateTitle: {
+        marginTop: spacing.md,
+        color: colors.textPrimary,
+        fontSize: typography.heading,
+        fontWeight: "900",
+    },
+    stateText: {
+        marginTop: spacing.sm,
+        color: colors.textMuted,
+        fontSize: typography.bodyLarge,
+        textAlign: "center",
+    },
+    stateAction: {
+        minHeight: 42,
+        marginTop: spacing.lg,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    retryButton: {
+        minWidth: 112,
+        minHeight: 38,
+        paddingHorizontal: spacing.lg,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: radii.sm,
+        borderWidth: 1,
+        borderColor: `${colors.info}66`,
+        backgroundColor: `${colors.info}1f`,
     },
     retryButtonText: {
-        color: colors.textPrimary,
-        fontSize: typography.body,
-        fontWeight: "700",
+        color: colors.info,
+        fontSize: typography.bodySmall,
+        fontWeight: "900",
     },
+    buttonPressed: { opacity: 0.66 },
 });
