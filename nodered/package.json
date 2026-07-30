@@ -3,6 +3,10 @@
     "description": "A Node-RED Project",
     "version": "0.0.1",
     "private": true,
+    "scripts": {
+        "test": "node --test test/*.test.js",
+        "test:simulator": "node --test test/scenario-engine.test.js"
+    },
     "dependencies": {
         "node-red-contrib-postgresql": "~0.15.4"
     }

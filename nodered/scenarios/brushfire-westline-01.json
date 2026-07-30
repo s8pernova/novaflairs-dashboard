@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "scenarioKey": "brushfire-westline-01",
+  "name": "Brushfire Westline 01",
+  "simulatorVersion": "1.0.0",
+  "defaultSeed": 20260714,
+  "database": {
+    "scenarioId": 1,
+    "firebreakSegmentId": 1
+  },
+  "timing": {
+    "tickSeconds": 5,
+    "maxDurationSeconds": 180
+  },
+  "origin": {
+    "lat": 38.81234,
+    "lon": -77.09321
+  },
+  "bounds": {
+    "minEastM": -40,
+    "maxEastM": 25,
+    "minNorthM": -30,
+    "maxNorthM": 30
+  },
+  "initialState": {
+    "offsetEastM": -24,
+    "offsetNorthM": -8,
+    "altitudeM": 42,
+    "headingDeg": 82,
+    "baseSpreadRateMps": 0.1,
+    "spreadMultiplier": 1,
+    "windSpeedMps": 2.8,
+    "windDirectionDeg": 270,
+    "baseFlameLengthM": 1.5,
+    "baseBurnTimeS": 14,
+    "fuelFactor": 0.65,
+    "qualityScore": 0.92
+  },
+  "firebreak": {
+    "widthM": 4,
+    "normalHeadingDeg": 90,
+    "crossingIntensityThreshold": 0.65
+  },
+  "dynamics": {
+    "windSpreadFactorPerMps": 0.04,
+    "windFlameFactorPerMps": 0.06,
+    "fuelFlameFactor": 0.4,
+    "burnTimeWindReductionPerMps": 0.25,
+    "minSpreadRateMps": 0.04,
+    "maxSpreadRateMps": 0.7,
+    "minFlameLengthM": 0.5,
+    "maxFlameLengthM": 6,
+    "minBurnTimeS": 5,
+    "maxBurnTimeS": 40
+  },
+  "noise": {
+    "positionM": 0.35,
+    "altitudeM": 0.4,
+    "windSpeedMps": 0.12,
+    "windDirectionDeg": 1.5,
+    "flameLengthM": 0.08,
+    "burnTimeS": 0.35
+  },
+  "phases": [
+    {
+      "id": "ignition",
+      "startsAtSeconds": 0
+    },
+    {
+      "id": "growth",
+      "startsAtSeconds": 20
+    },
+    {
+      "id": "firebreak-approach",
+      "startsAtSeconds": 50
+    },
+    {
+      "id": "wind-driven",
+      "startsAtSeconds": 60
+    }
+  ],
+  "events": [
+    {
+      "id": "wind-shift",
+      "type": "wind_shift",
+      "atSeconds": 60,
+      "changes": {
+        "windSpeedMps": 10,
+        "windDirectionDeg": 270,
+        "headingDeg": 90,
+        "spreadMultiplier": 2
+      }
+    }
+  ],
+  "telemetry": {
+    "droneId": "drone-01",
+    "sourceKind": "simulated"
+  }
+}
