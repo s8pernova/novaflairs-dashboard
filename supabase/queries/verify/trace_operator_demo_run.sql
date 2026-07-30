@@ -1,4 +1,6 @@
 -- Read-only trace for the newest Node-RED scenario replay.
+BEGIN;
+
 WITH latest_run AS (
     SELECT raw_payload_json ->> 'runId' AS run_id
     FROM public.telemetry_observations
@@ -33,3 +35,5 @@ LEFT JOIN public.prediction_results AS prediction
     ON prediction.id = feed.prediction_result_id
 WHERE telemetry.raw_payload_json ->> 'runId' = latest_run.run_id
 ORDER BY telemetry.id;
+
+ROLLBACK;
