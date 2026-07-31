@@ -63,7 +63,10 @@ Go.
 For the deterministic operator demo:
 
 ```bash
-docker compose up -d --build nodered
+docker compose \
+  --env-file .env \
+  --env-file nodered/.env \
+  up -d --build nodered
 ```
 
 Open `http://localhost:1880`, select the `Scenario Simulator` flow, and select
@@ -133,8 +136,6 @@ The compose stack runs three services:
 
    ```
    TZ=America/New_York
-   PUID=1000
-   PGID=1000
    NODE_RED_DB_CA_CERT_PATH=/etc/novaflairs/supabase-ca.pem
 
    VITE_SUPABASE_URL=...
@@ -162,7 +163,10 @@ The compose stack runs three services:
 2. **Build and start**
 
    ```bash
-   docker compose up -d --build
+   docker compose \
+     --env-file .env \
+     --env-file nodered/.env \
+     up -d --build
    ```
 
 3. **Verify**
@@ -171,4 +175,8 @@ The compose stack runs three services:
    - Metabase: http://localhost:3000
 
    Node-RED stores mutable runtime data in the `node_red_data` Docker volume.
-   The repo contains only the seed files copied into that volume on first run.
+   Committed flows, settings, and dependencies are refreshed from the image on
+   every start; credentials, sessions, and context remain in the volume.
+
+Production bootstrap, data migration, deployment checks, and rollback are
+documented in [`docs/operations/deployment.md`](docs/operations/deployment.md).

@@ -16,7 +16,7 @@ COPY nodered/docker/entrypoint.sh /usr/local/bin/novaflairs-nodered-entrypoint
 RUN chmod +x /usr/local/bin/novaflairs-nodered-entrypoint \
     && mkdir -p /data \
     && find /data -mindepth 1 -maxdepth 1 -exec rm -rf -- {} + \
-    && chown -R node-red:node-red /opt/novaflairs-nodered /data
+    && chown -R node-red:node-red /data
 
 USER node-red
 

@@ -1,6 +1,6 @@
 import type { StyleSpecification } from "maplibre-gl";
 
-// Types 
+// Types
 
 export type MapStyleValue = StyleSpecification | string;
 
@@ -10,7 +10,7 @@ export interface MapStyleOption {
     style: MapStyleValue;
 }
 
-// Helpers 
+// Helpers
 
 export function rasterMapStyle(
     sourceId: string,
@@ -40,7 +40,7 @@ function esriTiles(service: string): string[] {
     return [`${ESRI}/${service}/MapServer/tile/{z}/{y}/{x}`];
 }
 
-// Map Style Catalogue 
+// Map Style Catalogue
 
 export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
     {

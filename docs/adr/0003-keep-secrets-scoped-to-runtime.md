@@ -135,6 +135,10 @@ Environment file policy:
 ### Operations
 
 - Docker Compose reads local orchestration values from `.env`.
+- Local Compose commands load `nodered/.env` as a second interpolation source,
+  but only the Node-RED service receives the declared server-only values.
+- Production Compose reads `/etc/novaflairs/compose.env`; the Compose file still
+  injects each value only into the runtime that requires it.
 - The Vite UI reads local browser-safe values from `ui/.env.local`.
 - Backend runtime settings live in `backend/.env`.
 - Node-RED runtime settings live in `nodered/.env`, while runtime state lives in

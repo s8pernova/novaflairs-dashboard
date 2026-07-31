@@ -7,10 +7,9 @@ This directory contains the public, source-controlled Node-RED assets:
 - `package.json` and `package-lock.json` for custom nodes
 
 At runtime, Docker Compose mounts a named `node_red_data` volume at `/data`.
-The image seeds editor flows and package state into that volume on first run.
-Tracked `settings.js` is refreshed from the image on every container start so
-runtime configuration cannot silently drift from Git. Node-RED editor changes
-are written to the Docker volume, not directly to Git.
+The image refreshes tracked flows, settings, package manifests, and installed
+nodes on every container start so production behavior cannot silently drift
+from Git. Credentials, sessions, and context remain in the volume.
 
 Do not commit Node-RED runtime state or credential files. In particular, keep
 these files out of source control:
@@ -57,7 +56,10 @@ npm test
 After changing tracked simulator code or settings, rebuild only Node-RED:
 
 ```bash
-docker compose up -d --build nodered
+docker compose \
+  --env-file .env \
+  --env-file nodered/.env \
+  up -d --build nodered
 ```
 
 The container validates the scenario during startup and exposes these values to
@@ -79,7 +81,10 @@ tracked `flows.json` for review.
 Start the source-controlled runtime from the repository root:
 
 ```bash
-docker compose up -d --build nodered
+docker compose \
+  --env-file .env \
+  --env-file nodered/.env \
+  up -d --build nodered
 ```
 
 Open `http://localhost:1880`, select the `Scenario Simulator` tab, and use one
