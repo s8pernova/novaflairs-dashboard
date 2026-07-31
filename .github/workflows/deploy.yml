@@ -43,7 +43,6 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           timeout: 2m
           command_timeout: 45m
-          script_stop: true
           script: |
             sudo -n -u deploy -- /usr/bin/bash \
               /srv/novaflairs-deploy/deploy.sh '${{ github.sha }}'
