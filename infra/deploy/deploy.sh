@@ -17,6 +17,7 @@ PREVIOUS_SHA=""
 PREVIOUS_DATA_SOURCE=""
 PREVIOUS_UI_IMAGE=""
 PREVIOUS_NODE_RED_IMAGE=""
+PREVIOUS_NODE_RED_USER=""
 ROLLBACK_COMPOSE_FILE=""
 ROLLBACK_OVERRIDE_FILE=""
 CUTOVER_STARTED=0
@@ -49,6 +50,7 @@ rollback_compose() {
 
   RELEASE_TAG="rollback" \
   NODE_RED_ROLLBACK_DATA_DIR="$APP_DIR/nodered" \
+  NODE_RED_ROLLBACK_USER="$PREVIOUS_NODE_RED_USER" \
     docker compose \
       --project-name "$PROJECT_NAME" \
       --project-directory "$APP_DIR" \
@@ -163,6 +165,10 @@ create_backup() {
   PREVIOUS_SHA=$(git -C "$APP_DIR" rev-parse HEAD)
   PREVIOUS_UI_IMAGE=$(docker inspect --format '{{.Image}}' novaflairs-ui)
   PREVIOUS_NODE_RED_IMAGE=$(docker inspect --format '{{.Image}}' novaflairs-nodered)
+  PREVIOUS_NODE_RED_USER=$(docker inspect --format '{{.Config.User}}' novaflairs-nodered)
+  if [[ -z "$PREVIOUS_NODE_RED_USER" ]]; then
+    PREVIOUS_NODE_RED_USER="0:0"
+  fi
 
   printf '%s\n' "$PREVIOUS_SHA" >"$BACKUP_DIR/previous-sha"
   git -C "$APP_DIR" status --porcelain=v1 >"$BACKUP_DIR/git-status.txt"
@@ -174,6 +180,7 @@ create_backup() {
 
   detect_node_red_data_source
   printf '%s\n' "$PREVIOUS_DATA_SOURCE" >"$BACKUP_DIR/nodered-data-source"
+  printf '%s\n' "$PREVIOUS_NODE_RED_USER" >"$BACKUP_DIR/nodered-user"
   backup_node_red_data
 
   docker image tag "$PREVIOUS_UI_IMAGE" novaflairs-dashboard-ui:rollback
@@ -187,7 +194,9 @@ restore_checkout_and_data() {
   git -C "$APP_DIR" reset --hard "$PREVIOUS_SHA"
 
   if [[ "$PREVIOUS_DATA_SOURCE" == "bind" ]]; then
-    tar -C "$APP_DIR/nodered" -xzf "$BACKUP_DIR/nodered-data.tar.gz"
+    tar --same-permissions \
+      -C "$APP_DIR/nodered" \
+      -xzf "$BACKUP_DIR/nodered-data.tar.gz"
   fi
 }
 

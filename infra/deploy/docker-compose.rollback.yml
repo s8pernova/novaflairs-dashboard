@@ -1,4 +1,5 @@
 services:
   nodered:
+    user: "${NODE_RED_ROLLBACK_USER:?NODE_RED_ROLLBACK_USER is required}"
     volumes:
       - ${NODE_RED_ROLLBACK_DATA_DIR:?NODE_RED_ROLLBACK_DATA_DIR is required}:/data
