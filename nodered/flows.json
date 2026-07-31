@@ -1,0 +1,561 @@
+[
+    {
+        "id": "38058381c81548eb",
+        "type": "tab",
+        "label": "Method 2 Baseline",
+        "disabled": false,
+        "info": "Acts like the ground calculator that receives the data from the drone",
+        "env": []
+    },
+    {
+        "id": "0473def42f87c64d",
+        "type": "tab",
+        "label": "Scenario Simulator",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "2e7ffb782503cc36",
+        "type": "postgreSQLConfig",
+        "name": "NOVAflair Prod",
+        "host": "DB_HOST",
+        "hostFieldType": "env",
+        "port": "DB_PORT",
+        "portFieldType": "env",
+        "database": "DB_NAME",
+        "databaseFieldType": "env",
+        "ssl": "true",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": 10,
+        "maxFieldType": "num",
+        "idle": 1000,
+        "idleFieldType": "num",
+        "connectionTimeout": 10000,
+        "connectionTimeoutFieldType": "num",
+        "user": "DB_USER",
+        "userFieldType": "env",
+        "password": "DB_PASSWORD",
+        "passwordFieldType": "env"
+    },
+    {
+        "id": "cc4b6711361ca6d7",
+        "type": "inject",
+        "z": "38058381c81548eb",
+        "name": "Poll for new telemetry",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 580,
+        "y": 280,
+        "wires": [
+            [
+                "06b7910b8bc7ab69"
+            ]
+        ]
+    },
+    {
+        "id": "06b7910b8bc7ab69",
+        "type": "postgresql",
+        "z": "38058381c81548eb",
+        "name": "Fetch unprocessed observations",
+        "query": "SELECT\n    t.id AS telemetry_observation_id,\n    t.firebreak_segment_id,\n    t.observed_at,\n    t.wind_speed_2m_mps,\n    t.flame_length_m,\n    t.burn_time_s,\n    f.width_m AS firebreak_width_m,\n    mr.id AS model_run_id,\n    mr.cross_threshold,\n    mr.high_risk_threshold,\n    mr.severe_risk_threshold\nFROM telemetry_observations t\nJOIN firebreak_segments f\n    ON f.id = t.firebreak_segment_id\nJOIN model_runs mr\n    ON mr.method_name = 'Method 2 Firebreak Crossing'\nLEFT JOIN prediction_results p\n    ON p.telemetry_observation_id = t.id\n   AND p.model_run_id = mr.id\nWHERE p.id IS NULL\nORDER BY t.observed_at ASC\nLIMIT 25;",
+        "postgreSQLConfig": "2e7ffb782503cc36",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 870,
+        "y": 280,
+        "wires": [
+            [
+                "1ac4aa64fa3e75a4"
+            ]
+        ]
+    },
+    {
+        "id": "1ac4aa64fa3e75a4",
+        "type": "switch",
+        "z": "38058381c81548eb",
+        "name": "Any rows found",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "0",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1160,
+        "y": 280,
+        "wires": [
+            [
+                "a5341ec5f20f65cd"
+            ]
+        ]
+    },
+    {
+        "id": "a5341ec5f20f65cd",
+        "type": "split",
+        "z": "38058381c81548eb",
+        "name": "One observation at a time",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "property": "payload",
+        "x": 1430,
+        "y": 280,
+        "wires": [
+            [
+                "7f8bebf6fda006b7"
+            ]
+        ]
+    },
+    {
+        "id": "7f8bebf6fda006b7",
+        "type": "function",
+        "z": "38058381c81548eb",
+        "name": "Compute firebreak crossing",
+        "func": "const row = msg.payload;\n\nconst Uw = Number(row.wind_speed_2m_mps);\nconst Lfl = Number(row.flame_length_m);\nconst Wfb = Number(row.firebreak_width_m);\nconst tc = Number(row.burn_time_s);\n\nif ([Uw, Lfl, Wfb, tc].some(v => Number.isNaN(v))) {\n    node.error(\"Missing or invalid numeric input\", msg);\n    return null;\n}\n\nconst beta_tx =\n    -1.8925 +\n    (0.055 * Uw) +\n    (0.9418 * Lfl) -\n    (0.4469 * Wfb) +\n    (0.0114 * tc);\n\nconst crossing_probability = Math.exp(beta_tx) / (1 + Math.exp(beta_tx));\n\nlet risk_level;\nif (crossing_probability < 0.25) {\n    risk_level = \"moderate\";\n} else if (crossing_probability < 0.35) {\n    risk_level = \"transition\";\n} else if (crossing_probability < 0.45) {\n    risk_level = \"high\";\n} else {\n    risk_level = \"severe\";\n}\n\nconst cross_threshold = Number(row.cross_threshold ?? 0.30);\nconst predicted_crossed_yes_no =\n    crossing_probability >= cross_threshold ? \"YES\" : \"NO\";\n\nconst result = {\n    telemetry_observation_id: row.telemetry_observation_id,\n    model_run_id: row.model_run_id,\n    firebreak_width_m_snapshot: Wfb,\n    beta_tx,\n    crossing_probability,\n    risk_level,\n    predicted_crossed_yes_no\n};\n\nmsg.payload = result;\n\nmsg.params = [\n    result.telemetry_observation_id,\n    result.model_run_id,\n    result.firebreak_width_m_snapshot,\n    result.beta_tx,\n    result.crossing_probability,\n    result.risk_level,\n    result.predicted_crossed_yes_no\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1740,
+        "y": 280,
+        "wires": [
+            [
+                "b690814f514f41e2"
+            ]
+        ]
+    },
+    {
+        "id": "b690814f514f41e2",
+        "type": "postgresql",
+        "z": "38058381c81548eb",
+        "name": "Insert prediction result",
+        "query": "INSERT INTO prediction_results (\n    telemetry_observation_id,\n    model_run_id,\n    firebreak_width_m_snapshot,\n    beta_tx,\n    crossing_probability,\n    risk_level,\n    predicted_crossed_yes_no\n)\nVALUES (\n    $1, $2, $3, $4, $5, $6, $7\n)\nON CONFLICT (telemetry_observation_id, model_run_id)\nDO NOTHING;",
+        "postgreSQLConfig": "2e7ffb782503cc36",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 2040,
+        "y": 280,
+        "wires": [
+            [
+                "7e1a78a70369f43a"
+            ]
+        ]
+    },
+    {
+        "id": "7e1a78a70369f43a",
+        "type": "debug",
+        "z": "38058381c81548eb",
+        "name": "Inserted prediction",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2310,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "b9bff593428e291a",
+        "type": "catch",
+        "z": "38058381c81548eb",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 1620,
+        "y": 360,
+        "wires": [
+            [
+                "af256e726eb2aa05"
+            ]
+        ]
+    },
+    {
+        "id": "af256e726eb2aa05",
+        "type": "debug",
+        "z": "38058381c81548eb",
+        "name": "Errors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1760,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "ddc26eeda4345890",
+        "type": "inject",
+        "z": "0473def42f87c64d",
+        "name": "Start",
+        "props": [
+            {
+                "p": "action",
+                "v": "start",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 350,
+        "y": 160,
+        "wires": [
+            [
+                "a2730c87543dfd66"
+            ]
+        ]
+    },
+    {
+        "id": "0101de8614921efd",
+        "type": "inject",
+        "z": "0473def42f87c64d",
+        "name": "Pause",
+        "props": [
+            {
+                "p": "action",
+                "v": "pause",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 350,
+        "y": 220,
+        "wires": [
+            [
+                "a2730c87543dfd66"
+            ]
+        ]
+    },
+    {
+        "id": "7d3478d84af52ab4",
+        "type": "inject",
+        "z": "0473def42f87c64d",
+        "name": "Resume",
+        "props": [
+            {
+                "p": "action",
+                "v": "resume",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 360,
+        "y": 280,
+        "wires": [
+            [
+                "a2730c87543dfd66"
+            ]
+        ]
+    },
+    {
+        "id": "1534f90e4e81acd4",
+        "type": "inject",
+        "z": "0473def42f87c64d",
+        "name": "Reset",
+        "props": [
+            {
+                "p": "action",
+                "v": "reset",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 350,
+        "y": 340,
+        "wires": [
+            [
+                "a2730c87543dfd66"
+            ]
+        ]
+    },
+    {
+        "id": "6063487ee18eb361",
+        "type": "inject",
+        "z": "0473def42f87c64d",
+        "name": "Trigger Wind Shift",
+        "props": [
+            {
+                "p": "action",
+                "v": "wind-shift",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 390,
+        "y": 400,
+        "wires": [
+            [
+                "a2730c87543dfd66"
+            ]
+        ]
+    },
+    {
+        "id": "d04d12ea9a08281a",
+        "type": "inject",
+        "z": "0473def42f87c64d",
+        "name": "Step",
+        "props": [
+            {
+                "p": "action",
+                "v": "step",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 350,
+        "y": 460,
+        "wires": [
+            [
+                "2c771b0aa8b2e806"
+            ]
+        ]
+    },
+    {
+        "id": "a2730c87543dfd66",
+        "type": "function",
+        "z": "0473def42f87c64d",
+        "name": "Control Run",
+        "func": "const engine = global.get(\"scenarioEngine\");\nconst scenario = global.get(\"scenarios\").brushfireWestline01;\nconst stateKey = \"scenarioState\";\nconst action = msg.action;\nlet state = flow.get(stateKey);\n\nconst createRun = () => {\n    const startedAt = new Date().toISOString();\n    const seed = Number(msg.seed ?? scenario.defaultSeed);\n\n    return engine.initializeScenario(scenario, {\n        runId: `${scenario.scenarioKey}-${Date.now()}`,\n        seed,\n        startedAt,\n    });\n};\n\nswitch (action) {\n    case \"start\":\n        if (state && [\"running\", \"paused\"].includes(state.status)) {\n            node.warn(\"A scenario run is already active\");\n            return null;\n        }\n        state = createRun();\n        break;\n    case \"reset\":\n        state = createRun();\n        break;\n    case \"pause\":\n        if (!state) {\n            node.warn(\"Start a scenario before pausing it\");\n            return null;\n        }\n        state = engine.pauseScenario(state);\n        break;\n    case \"resume\":\n        if (!state) {\n            node.warn(\"Start a scenario before resuming it\");\n            return null;\n        }\n        state = engine.resumeScenario(state);\n        break;\n    case \"wind-shift\":\n        if (!state || state.status === \"complete\") {\n            node.warn(\"Start an active scenario before triggering an event\");\n            return null;\n        }\n        state = engine.applyScenarioEvent(scenario, state, \"wind-shift\");\n        break;\n    default:\n        node.error(`Unknown scenario control: ${action}`, msg);\n        return null;\n}\n\nflow.set(stateKey, state);\n\nconst color = state.status === \"running\" ? \"green\" : \"yellow\";\nnode.status({\n    fill: color,\n    shape: \"dot\",\n    text: `${state.status} | ${state.phase} | tick ${state.tick}`,\n});\n\nmsg.payload = {\n    action,\n    runId: state.runId,\n    status: state.status,\n    phase: state.phase,\n    tick: state.tick,\n    elapsedSeconds: state.elapsedSeconds,\n    firedEventIds: state.firedEventIds,\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 280,
+        "wires": [
+            [
+                "6a32e05e7009acdc"
+            ]
+        ]
+    },
+    {
+        "id": "6a32e05e7009acdc",
+        "type": "debug",
+        "z": "0473def42f87c64d",
+        "name": "Run Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "2c771b0aa8b2e806",
+        "type": "function",
+        "z": "0473def42f87c64d",
+        "name": "Advance Run",
+        "func": "const engine = global.get(\"scenarioEngine\");\nconst scenario = global.get(\"scenarios\").brushfireWestline01;\nconst stateKey = \"scenarioState\";\nconst action = msg.action;\nlet state = flow.get(stateKey);\n\nif (!state) {\n    if (action === \"tick\") {\n        return [null, null];\n    }\n    node.warn(\"Start a scenario before advancing it\");\n    return [null, null];\n}\n\nif (action === \"tick\" && state.status !== \"running\") {\n    return [null, null];\n}\n\nif (action === \"step\") {\n    if (state.status !== \"paused\") {\n        node.warn(\"Step is available only while the scenario is paused\");\n        return [null, null];\n    }\n    state = engine.resumeScenario(state);\n} else if (action !== \"tick\") {\n    node.error(`Unknown advance action: ${action}`, msg);\n    return [null, null];\n}\n\nconst result = engine.advanceScenario(scenario, state);\nlet nextState = result.state;\n\nif (action === \"step\" && nextState.status === \"running\") {\n    nextState = engine.pauseScenario(nextState);\n}\n\nflow.set(stateKey, nextState);\n\nconst color = nextState.status === \"complete\" ? \"blue\" : \"green\";\nnode.status({\n    fill: color,\n    shape: \"dot\",\n    text: `${nextState.status} | ${nextState.phase} | tick ${nextState.tick}`,\n});\n\nif (!result.telemetry) {\n    return [null, null];\n}\n\nconst telemetryMessage = {\n    ...msg,\n    payload: result.telemetry,\n};\n\nconst outcomeMessage = result.outcome\n    ? {\n          payload: result.outcome,\n          runId: nextState.runId,\n          telemetry: result.telemetry,\n      }\n    : null;\n\nreturn [telemetryMessage, outcomeMessage];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 480,
+        "wires": [
+            [
+                "6724df73777b2ea8"
+            ],
+            [
+                "b00410d669bec748"
+            ]
+        ]
+    },
+    {
+        "id": "9a9c16dd47a3461c",
+        "type": "inject",
+        "z": "0473def42f87c64d",
+        "name": "Tick",
+        "props": [
+            {
+                "p": "action",
+                "v": "tick",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 350,
+        "y": 520,
+        "wires": [
+            [
+                "2c771b0aa8b2e806"
+            ]
+        ]
+    },
+    {
+        "id": "b00410d669bec748",
+        "type": "debug",
+        "z": "0473def42f87c64d",
+        "name": "Outcome Preview",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 870,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "6724df73777b2ea8",
+        "type": "function",
+        "z": "0473def42f87c64d",
+        "name": "Prep Telemetry Input",
+        "func": "const telemetry = msg.payload;\n\nmsg.params = [\n    telemetry.scenarioId,\n    telemetry.firebreakSegmentId,\n    telemetry.droneId,\n    telemetry.observedAt,\n    telemetry.lat,\n    telemetry.lon,\n    telemetry.altM,\n    telemetry.windSpeed2mMps,\n    telemetry.windDirectionDeg,\n    telemetry.flameLengthM,\n    telemetry.burnTimeS,\n    telemetry.sourceKind,\n    telemetry.qualityScore,\n    JSON.stringify(telemetry.rawPayloadJson),\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 880,
+        "y": 480,
+        "wires": [
+            [
+                "ea9e51188a3f2516"
+            ]
+        ]
+    },
+    {
+        "id": "ea9e51188a3f2516",
+        "type": "postgresql",
+        "z": "0473def42f87c64d",
+        "name": "Insert Simulated Telemetry",
+        "query": "INSERT INTO telemetry_observations (\n  scenario_id,\n  firebreak_segment_id,\n  drone_id,\n  observed_at,\n  lat,\n  lon,\n  alt_m,\n  wind_speed_2m_mps,\n  wind_direction_deg,\n  flame_length_m,\n  burn_time_s,\n  source_kind,\n  quality_score,\n  raw_payload_json\n)\nVALUES (\n  $1,\n  $2,\n  $3,\n  $4,\n  $5,\n  $6,\n  $7,\n  $8,\n  $9,\n  $10,\n  $11,\n  $12,\n  $13,\n  $14::jsonb\n);",
+        "postgreSQLConfig": "2e7ffb782503cc36",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 1160,
+        "y": 480,
+        "wires": [
+            [
+                "f6b9213808ec40f8"
+            ]
+        ]
+    },
+    {
+        "id": "f6b9213808ec40f8",
+        "type": "debug",
+        "z": "0473def42f87c64d",
+        "name": "Inserted telemetry data",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1420,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "ff4a8eb9640c257e",
+        "type": "catch",
+        "z": "0473def42f87c64d",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 520,
+        "y": 680,
+        "wires": [
+            [
+                "a9b5d230a9ff7457"
+            ]
+        ]
+    },
+    {
+        "id": "a9b5d230a9ff7457",
+        "type": "debug",
+        "z": "0473def42f87c64d",
+        "name": "Scenario Errors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 680,
+        "wires": []
+    }
+]

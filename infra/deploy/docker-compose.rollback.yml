@@ -1,0 +1,4 @@
+services:
+  nodered:
+    volumes:
+      - ${NODE_RED_ROLLBACK_DATA_DIR:?NODE_RED_ROLLBACK_DATA_DIR is required}:/data

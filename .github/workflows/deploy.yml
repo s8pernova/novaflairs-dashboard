@@ -5,66 +5,44 @@ on:
   push:
     branches: ["main"]
     paths:
-      # - "nodered/**"
+      - "docker-compose.yml"
+      - "ui/**"
+      - "nodered/**"
+      - "infra/**"
       - ".github/workflows/deploy.yml"
 
 concurrency:
-  group: deploy-main
-  cancel-in-progress: true
+  group: production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    environment: production
 
     steps:
+      - name: Connect to Tailscale
+        # tailscale/github-action v4.1.3
+        uses: tailscale/github-action@780049a30b6ff5c378a9e7b389d15ece7a204888
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:deploy
+          ping: ${{ secrets.VM_HOST }}
+
       - name: Deploy to VM over SSH
-        uses: appleboy/ssh-action@v1.0.3
+        # appleboy/ssh-action v1.2.5
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2
         with:
           host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
+          username: kiddo
           key: ${{ secrets.VM_SSH_KEY }}
           timeout: 2m
           command_timeout: 45m
-          script_stop: true
           script: |
-            set -euo pipefail
-
-            REPO_DIR=/opt/novaflairs-dashboard
-            DATA_DIR=/opt/node-red-data
-            CONTAINER_NAME=nodered
-            IMAGE_NAME=nodered/node-red:latest
-
-            cd "$REPO_DIR"
-            git fetch --all --prune
-            git reset --hard origin/main
-
-            mkdir -p "$DATA_DIR"
-
-            docker pull "$IMAGE_NAME"
-            docker rm -f "$CONTAINER_NAME" || true
-
-            rsync -rlptD --delete \
-              --exclude '.git/' \
-              "$REPO_DIR/nodered/" "$DATA_DIR/"
-
-            docker run --rm \
-              --entrypoint /bin/sh \
-              --user "$(id -u):$(id -g)" \
-              -e HOME=/tmp \
-              -e npm_config_cache=/tmp/.npm \
-              -v "$DATA_DIR:/data" \
-              "$IMAGE_NAME" \
-              -lc 'cd /data && rm -rf node_modules && npm ci --omit=dev'
-
-            docker run -d \
-              --name "$CONTAINER_NAME" \
-              --restart unless-stopped \
-              --user "$(id -u):$(id -g)" \
-              -p 127.0.0.1:1880:1880 \
-              -v "$DATA_DIR:/data" \
-              "$IMAGE_NAME"
-
-            sleep 10
-            docker ps --filter "name=$CONTAINER_NAME"
-            docker logs --tail=120 "$CONTAINER_NAME" || true
+            sudo -n -u deploy -- /usr/bin/bash \
+              /srv/novaflairs-deploy/deploy.sh '${{ github.sha }}'

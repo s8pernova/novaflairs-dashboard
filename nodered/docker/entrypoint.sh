@@ -1,9 +1,11 @@
 #!/bin/sh
 set -eu
 
+IMAGE_DIR="${NODE_RED_IMAGE_DIR:-/opt/novaflairs-nodered}"
+
 mkdir -p /data
 
-copy_file() {
+copy_from_image() {
   src="$1"
   dest="$2"
 
@@ -12,20 +14,17 @@ copy_file() {
   fi
 }
 
-copy_dir() {
-  src="$1"
-  dest="$2"
+copy_from_image "$IMAGE_DIR/flows.json" /data/flows.json
+copy_from_image "$IMAGE_DIR/settings.js" /data/settings.js
+copy_from_image "$IMAGE_DIR/package.json" /data/package.json
+copy_from_image "$IMAGE_DIR/package-lock.json" /data/package-lock.json
 
-  if [ -d "$src" ]; then
-    rm -rf "$dest"
-    cp -a "$src" "$dest"
-  fi
-}
+rm -rf /data/node_modules
+ln -s "$IMAGE_DIR/node_modules" /data/node_modules
 
-copy_file /opt/orbit-nodered/flows.json /data/flows.json
-copy_file /opt/orbit-nodered/flows_cred.json /data/flows_cred.json
-copy_file /opt/orbit-nodered/settings.js /data/settings.js
-copy_dir  /opt/orbit-nodered/lib /data/lib
+if [ ! -f /data/flows_cred.json ]; then
+  printf "{}\n" > /data/flows_cred.json
+fi
 
 cd /usr/src/node-red
 exec npm start -- --userDir /data

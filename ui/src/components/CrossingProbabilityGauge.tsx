@@ -39,7 +39,7 @@ export default function CrossingProbabilityGauge({
     const pct = Math.round(prob * 100);
     const isSevere = level === "SEVERE" || level === "HIGH";
 
-    // Gauge fills from 0 → pct on a 0-100 scale
+    // Gauge fills from 0 to pct on a 0-100 scale
     const data = [{ value: pct }];
 
     return (
